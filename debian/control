@@ -1,0 +1,19 @@
+Source: vncsnapshot
+Section: x11
+Priority: optional
+Maintainer: Roberto C. Sanchez <roberto@familiasanchez.net>
+Build-Depends: debhelper (>= 4.0.0), libjpeg62-dev, zlib1g-dev
+Standards-Version: 3.6.1
+
+Package: vncsnapshot
+Architecture: any
+Depends: ${shlibs:Depends}, vnc-common
+Description: A utility that takes JPEG snapshots from VNC servers
+ VNC Snapshot is a command-line program for VNC. It will save a JPEG
+ image of the VNC server's screen.
+ .
+ To use this you must be able to connect directly to the VNC server via
+ a TCP connection.  It does not yet work for connections tunnelled over
+ SSH.
+ .
+ More information: http://vncsnapshot.sourceforge.net/

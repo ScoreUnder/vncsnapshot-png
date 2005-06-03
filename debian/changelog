@@ -1,0 +1,7 @@
+vncsnapshot (1.2a-1) unstable; urgency=low
+
+  * Initial Release.
+  * Resolve ITP (Closes: #311874)
+
+ -- Roberto C. Sanchez <roberto@familiasanchez.net>  Fri,  3 Jun 2005 20:07:32 -0400
+
