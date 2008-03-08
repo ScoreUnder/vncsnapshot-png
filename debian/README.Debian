@@ -5,4 +5,4 @@ The original distribution includes a vncpasswd binary which this package has
 ommitted.  This is because the dependency on vnc-common ensures that vncpasswd
 is available.
 
- -- Roberto C. Sanchez <roberto@familiasanchez.net>, Fri,  3 Jun 2005 20:07:32 -0400
+ -- Roberto C. Sanchez <roberto@connexer.com>, Fri,  3 Jun 2005 20:07:32 -0400
