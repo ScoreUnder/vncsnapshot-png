@@ -134,7 +134,7 @@ extern char *CopyScreenToData(int x, int y, int w, int h);
 extern void FillBufferRectangle(int x, int y, int w, int h, unsigned long pixel);
 extern void ShrinkBuffer(long x, long y, long req_width, long req_height);
 extern void write_JPEG_file (char * filename, int quality, int width, int height);
-//extern static void write_PNG (char * filename, int quality, int width, int height);
+extern void write_PNG (char * filename, int quality, int width, int height);
 extern int BufferIsBlank();
 extern int BufferWritten();
 
