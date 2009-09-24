@@ -30,6 +30,8 @@ static const char *ID = "$Id: buffer.c,v 1.6 2004/09/09 00:22:33 grmcdorman Exp 
 #include <stdio.h>
 #undef INT16
 
+#include <png.h>      /* PNG lib */
+
 static void BufferPixelToRGB(unsigned long pixel, int *r, int *g, int *b);
 
 static char * rawBuffer = NULL;
@@ -306,6 +308,72 @@ write_JPEG_file (char * filename, int quality, int width, int height)
 
   /* And we're done! */
 }
+
+extern void write_PNG(char *filename, int interlace, int width, int height)
+{
+    int i;
+    int bit_depth=0, color_type;
+    png_bytep row_pointers[height];
+    png_structp png_ptr;
+    png_infop info_ptr;
+    FILE *outfile = fopen(filename, "wb");
+
+    for (i=0; i<height; i++)
+	{
+		//row_pointers[i] = rawBuffer + i * 4 * width; //XXX
+		row_pointers[i] = & rawBuffer[i * 3 * width];
+	}
+    
+    if (!outfile)
+    {
+	fprintf (stderr, "Error: Couldn't fopen %s.\n", filename);
+	exit(EXIT_FAILURE);
+    }
+    
+    png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, 
+	(png_voidp) NULL, (png_error_ptr) NULL, (png_error_ptr) NULL);
+    
+    if (!png_ptr)
+	{
+		fprintf(stderr, "Error: Couldn't create PNG write struct.");
+		exit(1);
+	}
+    
+    info_ptr = png_create_info_struct(png_ptr);
+    if (!info_ptr)
+    {
+		png_destroy_write_struct(&png_ptr, (png_infopp) NULL);
+		fprintf(stderr, "Error: Couldn't create PNG info struct.");
+		exit(1);
+    }
+    
+    png_init_io(png_ptr, outfile);
+    
+    png_set_compression_level(png_ptr, Z_BEST_COMPRESSION);
+    
+    bit_depth = 8;
+    color_type = PNG_COLOR_TYPE_RGB;
+    //png_set_invert_alpha(png_ptr);
+    //png_set_bgr(png_ptr);
+
+    png_set_IHDR(png_ptr, info_ptr, width, height, 
+		 bit_depth, color_type, interlace, 
+		 PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
+    
+    png_write_info(png_ptr, info_ptr);
+    
+    printf ("Now writing PNG file\n");
+    
+    png_write_image(png_ptr, row_pointers);
+  
+    png_write_end(png_ptr, info_ptr);
+    /* puh, done, now freeing memory... */
+    png_destroy_write_struct(&png_ptr, &info_ptr);
+    
+    if (outfile != NULL)
+	(void) fclose(outfile);
+    /*@i2@*/ } /* tell splint to ignore false warning for not 
+		  released memory of png_ptr and info_ptr */
 
 static void
 BufferPixelToRGB(unsigned long pixel, int *r, int *g, int *b)

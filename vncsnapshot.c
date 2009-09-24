@@ -115,7 +115,7 @@ main(int argc, char **argv)
        * before that. If not, it goes at the end, with .jpg appended.
        */
       cp = strrchr(appData.outputFilename, '.');
-      if (cp != NULL) {
+      /* if (cp != NULL) {
           char *jpg = "jpg";
           char *jpeg = "jpeg";
           int is_jpg = 1;
@@ -137,6 +137,17 @@ main(int argc, char **argv)
                   i++;
               }
           }
+      } */
+      if (cp != NULL) {
+          char *png = "png";
+          i = 0;
+          while (cp[i+1]) {
+              if (tolower(cp[i+1]) != png[i]) {
+				  cp = NULL;
+                  break;
+              }
+              i++;
+          }
       }
       if (cp != NULL) {
           strncpy(filename, appData.outputFilename, cp - appData.outputFilename);
@@ -144,7 +155,7 @@ main(int argc, char **argv)
           suffix = cp;
       } else {
           strcpy(filename, appData.outputFilename);
-          suffix = ".jpg";
+          suffix = ".png";
           append = filename + strlen(filename);
       }
   } else {
@@ -215,7 +226,8 @@ main(int argc, char **argv)
 
     /* shrink buffer to requested rectangle */
     ShrinkBuffer(appData.rectX, appData.rectY, appData.rectWidth, appData.rectHeight);
-    write_JPEG_file(filename, appData.saveQuality, appData.rectWidth, appData.rectHeight);
+    //write_JPEG_file(filename, appData.saveQuality, appData.rectWidth, appData.rectHeight);
+    write_PNG(filename, 0 /* don't interlace */, appData.rectWidth, appData.rectHeight);
     if (!appData.quiet) {
       fprintf(stderr, "Image saved from %s %dx%d screen to ", vncServerName ? vncServerName : "(local host)",
               si.framebufferWidth, si.framebufferHeight);
