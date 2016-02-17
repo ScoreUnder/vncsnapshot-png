@@ -20,7 +20,6 @@
 /*
  * vncsnapshot.c - the VNC snapshot.
  */
-static const char *ID = "$Id: vncsnapshot.c,v 1.7 2004/09/09 00:22:33 grmcdorman Exp $";
 
 #include <time.h>
 #include <ctype.h>

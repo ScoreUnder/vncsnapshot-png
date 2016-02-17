@@ -27,7 +27,6 @@
 /*
  * vncauth.c - Functions for VNC password management and authentication.
  */
-static const char *ID = "$Id: vncauth.c,v 1.5 2004/09/09 00:22:33 grmcdorman Exp $";
 
 #ifndef WIN32
 #include <stdio.h>

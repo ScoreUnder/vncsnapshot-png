@@ -21,7 +21,6 @@
 /*
  * sockets.cxx - functions to deal with sockets.
  */
-static const char *ID = "$Id: sockets.cxx,v 1.3 2004/09/09 00:22:33 grmcdorman Exp $";
 
 #ifdef WIN32
 #include <winsock2.h>

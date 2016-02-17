@@ -21,7 +21,6 @@
  * cursor.c - code to support cursor shape updates (XCursor and
  * RichCursor preudo-encodings).
  */
-static const char *ID = "$Id: cursor.c,v 1.5 2004/09/09 00:22:33 grmcdorman Exp $";
 
 #include "vncsnapshot.h"
 

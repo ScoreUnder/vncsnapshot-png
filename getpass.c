@@ -22,7 +22,6 @@
 /*
  * passwd.c - get password from console, Win32
  */
-static const char *ID = "$Id: getpass.c,v 1.3 2002/02/09 22:27:32 grmcdorman Exp $";
 
 #include <conio.h>
 

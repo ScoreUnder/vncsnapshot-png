@@ -20,7 +20,6 @@
 /*
  * listen.c - listen for incoming connections
  */
-static const char *ID = "$Id: listen.c,v 1.5 2003/03/26 00:31:59 grmcdorman Exp $";
 
 #ifndef WIN32
 #include <unistd.h>

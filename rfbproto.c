@@ -23,7 +23,6 @@
 /*
  * rfbproto.c - functions to deal with client side of RFB protocol.
  */
-static const char *ID = "$Id: rfbproto.c,v 1.6 2004/09/09 00:22:33 grmcdorman Exp $";
 
 #include <stdint.h>
 #ifdef WIN32
