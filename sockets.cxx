@@ -49,8 +49,6 @@ extern "C" {
 #include "rdr/FdOutStream.h"
 #include "rdr/Exception.h"
 
-extern "C" { void PrintInHex(char *buf, size_t len); }
-
 
 int rfbsock;
 rdr::FdInStream* fis;
@@ -355,47 +353,4 @@ Bool StringToIPAddr(const char *str, unsigned int *addr)
   }
 
   return False;
-}
-
-
-/*
- * Print out the contents of a packet for debugging.
- */
-
-void PrintInHex(char *buf, size_t len)
-{
-  size_t i, j;
-  char c, str[17];
-
-  str[16] = 0;
-
-  fprintf(stderr,"ReadExact: ");
-
-  for (i = 0; i < len; i++)
-    {
-      if ((i % 16 == 0) && (i != 0)) {
-        fprintf(stderr,"           ");
-      }
-      c = buf[i];
-      str[i % 16] = (((c > 31) && (c < 127)) ? c : '.');
-      fprintf(stderr,"%02x ",(unsigned char)c);
-      if ((i % 4) == 3)
-        fprintf(stderr," ");
-      if ((i % 16) == 15)
-        {
-          fprintf(stderr,"%s\n",str);
-        }
-    }
-  if ((i % 16) != 0)
-    {
-      for (j = i % 16; j < 16; j++)
-        {
-          fprintf(stderr,"   ");
-          if ((j % 4) == 3) fprintf(stderr," ");
-        }
-      str[i % 16] = 0;
-      fprintf(stderr,"%s\n",str);
-    }
-
-  fflush(stderr);
 }
