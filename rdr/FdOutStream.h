@@ -23,7 +23,7 @@
 #ifndef __RDR_FDOUTSTREAM_H__
 #define __RDR_FDOUTSTREAM_H__
 
-#include <rdr/OutStream.h>
+#include "OutStream.h"
 
 namespace rdr {
 

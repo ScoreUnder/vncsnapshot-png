@@ -24,7 +24,7 @@
 #ifndef __RDR_ZLIBOUTSTREAM_H__
 #define __RDR_ZLIBOUTSTREAM_H__
 
-#include <rdr/OutStream.h>
+#include "OutStream.h"
 
 struct z_stream_s;
 

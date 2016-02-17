@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
 // USA.
 
-#include <rdr/NullOutStream.h>
-#include <rdr/Exception.h>
+#include "NullOutStream.h"
+#include "Exception.h"
 
 using namespace rdr;
 

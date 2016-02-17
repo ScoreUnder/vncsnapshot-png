@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
 // USA.
 
-#include <rdr/ZlibInStream.h>
-#include <rdr/Exception.h>
+#include "ZlibInStream.h"
+#include "Exception.h"
 #include <zlib.h>
 
 using namespace rdr;

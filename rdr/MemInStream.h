@@ -19,8 +19,8 @@
 #ifndef __RDR_MEMINSTREAM_H__
 #define __RDR_MEMINSTREAM_H__
 
-#include <rdr/InStream.h>
-#include <rdr/Exception.h>
+#include "InStream.h"
+#include "Exception.h"
 
 namespace rdr {
 

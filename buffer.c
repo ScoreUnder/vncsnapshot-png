@@ -31,6 +31,7 @@ static const char *ID = "$Id: buffer.c,v 1.6 2004/09/09 00:22:33 grmcdorman Exp 
 #undef INT16
 
 #include <png.h>      /* PNG lib */
+#include <zlib.h>
 
 static void BufferPixelToRGB(uint32_t pixel, int *r, int *g, int *b);
 

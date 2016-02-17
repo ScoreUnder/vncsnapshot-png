@@ -19,7 +19,7 @@
 #ifndef __RDR_NULLOUTSTREAM_H__
 #define __RDR_NULLOUTSTREAM_H__
 
-#include <rdr/OutStream.h>
+#include "OutStream.h"
 
 namespace rdr {
 

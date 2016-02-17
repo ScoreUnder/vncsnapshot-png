@@ -46,9 +46,9 @@ extern "C" {
 #include "vncsnapshot.h"
 }
 
-#include <rdr/FdInStream.h>
-#include <rdr/FdOutStream.h>
-#include <rdr/Exception.h>
+#include "rdr/FdInStream.h"
+#include "rdr/FdOutStream.h"
+#include "rdr/Exception.h"
 
 extern "C" { void PrintInHex(char *buf, int len); }
 

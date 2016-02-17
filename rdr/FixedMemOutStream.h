@@ -23,8 +23,8 @@
 #ifndef __RDR_FIXEDMEMOUTSTREAM_H__
 #define __RDR_FIXEDMEMOUTSTREAM_H__
 
-#include <rdr/OutStream.h>
-#include <rdr/Exception.h>
+#include "OutStream.h"
+#include "Exception.h"
 
 namespace rdr {
 

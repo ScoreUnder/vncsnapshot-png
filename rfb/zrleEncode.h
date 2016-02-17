@@ -31,7 +31,7 @@
 // algorithm writes to the position one past the end of the pixel data.
 //
 
-#include <rdr/OutStream.h>
+#include "../rdr/OutStream.h"
 #include <assert.h>
 
 using namespace rdr;

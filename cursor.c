@@ -23,7 +23,7 @@
  */
 static const char *ID = "$Id: cursor.c,v 1.5 2004/09/09 00:22:33 grmcdorman Exp $";
 
-#include <vncsnapshot.h>
+#include "vncsnapshot.h"
 
 
 #define OPER_SAVE     0

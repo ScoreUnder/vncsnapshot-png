@@ -24,7 +24,7 @@
 #ifndef __RDR_ZLIBINSTREAM_H__
 #define __RDR_ZLIBINSTREAM_H__
 
-#include <rdr/InStream.h>
+#include "InStream.h"
 
 struct z_stream_s;
 

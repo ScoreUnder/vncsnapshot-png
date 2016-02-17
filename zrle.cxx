@@ -22,9 +22,9 @@
 // Decode function for Zlib Run-length Encoding (ZRLE).
 //
 
-#include <rdr/ZlibInStream.h>
-#include <rdr/FdInStream.h>
-#include <rdr/Exception.h>
+#include "rdr/ZlibInStream.h"
+#include "rdr/FdInStream.h"
+#include "rdr/Exception.h"
 
 extern "C" {
 #include "vncsnapshot.h"
@@ -39,7 +39,7 @@ extern "C" {
     FillBufferRectangle(x, y, w, h, pix);
 
 #define BPP 8
-#include <rfb/zrleDecode.h>
+#include "rfb/zrleDecode.h"
 #undef BPP
 
 #undef FILL_RECT
@@ -47,15 +47,15 @@ extern "C" {
     FillBufferRectangle(x, y, w, h, pix);
 
 #define BPP 16
-#include <rfb/zrleDecode.h>
+#include "rfb/zrleDecode.h"
 #undef BPP
 #define BPP 32
-#include <rfb/zrleDecode.h>
+#include "rfb/zrleDecode.h"
 #define CPIXEL 24A
-#include <rfb/zrleDecode.h>
+#include "rfb/zrleDecode.h"
 #undef CPIXEL
 #define CPIXEL 24B
-#include <rfb/zrleDecode.h>
+#include "rfb/zrleDecode.h"
 #undef CPIXEL
 #undef BPP
 

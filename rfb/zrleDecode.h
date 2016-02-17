@@ -25,8 +25,8 @@
 // FILL_RECT
 // IMAGE_RECT
 
-#include <rdr/ZlibInStream.h>
-#include <rdr/InStream.h>
+#include "../rdr/ZlibInStream.h"
+#include "../rdr/InStream.h"
 #include <assert.h>
 
 using namespace rdr;

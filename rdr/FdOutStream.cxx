@@ -30,8 +30,8 @@
 #include <sys/time.h>
 #endif
 
-#include <rdr/FdOutStream.h>
-#include <rdr/Exception.h>
+#include "FdOutStream.h"
+#include "Exception.h"
 
 
 using namespace rdr;

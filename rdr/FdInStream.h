@@ -23,7 +23,7 @@
 #ifndef __RDR_FDINSTREAM_H__
 #define __RDR_FDINSTREAM_H__
 
-#include <rdr/InStream.h>
+#include "InStream.h"
 
 namespace rdr {
 

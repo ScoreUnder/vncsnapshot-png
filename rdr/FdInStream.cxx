@@ -36,8 +36,8 @@
 #include <sys/select.h>
 #endif
 
-#include <rdr/FdInStream.h>
-#include <rdr/Exception.h>
+#include "FdInStream.h"
+#include "Exception.h"
 
 using namespace rdr;
 
