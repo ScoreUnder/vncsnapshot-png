@@ -26,5 +26,3 @@ Features
 On Windows systems, please read BUILD.win32.
 
 On Unix and Linux systems, please read BUILD.unix.
-
-< $Id: README,v 1.4 2004/09/09 00:22:33 grmcdorman Exp $ >
