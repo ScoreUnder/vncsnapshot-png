@@ -71,11 +71,11 @@ vncEncryptAndStorePasswd(char *passwd, char *fname)
     /* pad password with nulls */
 
     for (i = 0; i < 8; i++) {
-	if (i < strlen(passwd)) {
-	    encryptedPasswd[i] = passwd[i];
-	} else {
-	    encryptedPasswd[i] = 0;
-	}
+        if (i < strlen(passwd)) {
+            encryptedPasswd[i] = passwd[i];
+        } else {
+            encryptedPasswd[i] = 0;
+        }
     }
 
     /* Do encryption in-place - this way we overwrite our copy of the plaintext
@@ -85,7 +85,7 @@ vncEncryptAndStorePasswd(char *passwd, char *fname)
     des(encryptedPasswd, encryptedPasswd);
 
     for (i = 0; i < 8; i++) {
-	putc(encryptedPasswd[i], fp);
+        putc(encryptedPasswd[i], fp);
     }
   
     fclose(fp);
@@ -108,12 +108,12 @@ vncDecryptPasswdFromFile(char *fname)
     if ((fp = fopen(fname,"r")) == NULL) return NULL;
 
     for (i = 0; i < 8; i++) {
-	ch = getc(fp);
-	if (ch == EOF) {
-	    fclose(fp);
-	    return NULL;
-	}
-	passwd[i] = ch;
+        ch = getc(fp);
+        if (ch == EOF) {
+            fclose(fp);
+            return NULL;
+        }
+        passwd[i] = ch;
     }
 
     fclose(fp);
@@ -140,17 +140,17 @@ vncEncryptBytes(unsigned char *bytes, char *passwd)
     /* key is simply password padded with nulls */
 
     for (i = 0; i < 8; i++) {
-	if (i < strlen(passwd)) {
-	    key[i] = passwd[i];
-	} else {
-	    key[i] = 0;
-	}
+        if (i < strlen(passwd)) {
+            key[i] = passwd[i];
+        } else {
+            key[i] = 0;
+        }
     }
 
     deskey(key, EN0);
 
     for (i = 0; i < CHALLENGESIZE; i += 8) {
-		des(bytes+i, bytes+i);
+                des(bytes+i, bytes+i);
     }
 }
 
@@ -164,15 +164,15 @@ vncEncryptBytes(unsigned char *bytes, char *passwd)
 void
 vncEncryptPasswd( unsigned char *encryptedPasswd, char *passwd )
 {
-	unsigned int i;
+        unsigned int i;
 
     /* pad password with nulls */
     for (i = 0; i < MAXPWLEN; i++) {
-		if (i < strlen(passwd)) {
-			encryptedPasswd[i] = passwd[i];
-		} else {	
-			encryptedPasswd[i] = 0;
-		}
+                if (i < strlen(passwd)) {
+                        encryptedPasswd[i] = passwd[i];
+                } else {        
+                        encryptedPasswd[i] = 0;
+                }
     }
 
     /* Do encryption in-place - this way we overwrite our copy of the plaintext
@@ -194,10 +194,10 @@ vncDecryptPasswd(const unsigned char *encryptedPasswd)
     unsigned int i;
     unsigned char *passwd = (unsigned char *)malloc(MAXPWLEN+1);
 
-	memcpy(passwd, encryptedPasswd, MAXPWLEN);
+        memcpy(passwd, encryptedPasswd, MAXPWLEN);
 
     for (i = 0; i < MAXPWLEN; i++) {
-		passwd[i] = encryptedPasswd[i];
+                passwd[i] = encryptedPasswd[i];
     }
 
     deskey(fixedkey, DE1);

@@ -46,69 +46,69 @@ HandleHextileBPP (int rx, int ry, int rw, int rh)
     for (x = rx; x < rx+rw; x += 16) {
       w = h = 16;
       if (rx+rw - x < 16)
-	w = rx+rw - x;
+        w = rx+rw - x;
       if (ry+rh - y < 16)
-	h = ry+rh - y;
+        h = ry+rh - y;
 
       if (!ReadFromRFBServer((char *)&subencoding, 1))
-	return False;
+        return False;
 
       if (subencoding & rfbHextileRaw) {
-	if (!ReadFromRFBServer(buffer, w * h * (BPP / 8)))
-	  return False;
+        if (!ReadFromRFBServer(buffer, w * h * (BPP / 8)))
+          return False;
 
-	CopyDataToScreen(buffer, x, y, w, h);
-	continue;
+        CopyDataToScreen(buffer, x, y, w, h);
+        continue;
       }
 
       if (subencoding & rfbHextileBackgroundSpecified)
-	if (!ReadFromRFBServer((char *)&bg, sizeof(bg)))
-	  return False;
+        if (!ReadFromRFBServer((char *)&bg, sizeof(bg)))
+          return False;
 
       FillBufferRectangle(x, y, w, h, bg);
 
       if (subencoding & rfbHextileForegroundSpecified)
-	if (!ReadFromRFBServer((char *)&fg, sizeof(fg)))
-	  return False;
+        if (!ReadFromRFBServer((char *)&fg, sizeof(fg)))
+          return False;
 
       if (!(subencoding & rfbHextileAnySubrects)) {
-	continue;
+        continue;
       }
 
       if (!ReadFromRFBServer((char *)&nSubrects, 1))
-	return False;
+        return False;
 
       ptr = (CARD8 *)buffer;
 
       if (subencoding & rfbHextileSubrectsColoured) {
-	if (!ReadFromRFBServer(buffer, nSubrects * (2 + (BPP / 8))))
-	  return False;
+        if (!ReadFromRFBServer(buffer, nSubrects * (2 + (BPP / 8))))
+          return False;
 
-	for (i = 0; i < nSubrects; i++) {
-	  GET_PIXEL(fg, ptr);
-	  sx = rfbHextileExtractX(*ptr);
-	  sy = rfbHextileExtractY(*ptr);
-	  ptr++;
-	  sw = rfbHextileExtractW(*ptr);
-	  sh = rfbHextileExtractH(*ptr);
-	  ptr++;
+        for (i = 0; i < nSubrects; i++) {
+          GET_PIXEL(fg, ptr);
+          sx = rfbHextileExtractX(*ptr);
+          sy = rfbHextileExtractY(*ptr);
+          ptr++;
+          sw = rfbHextileExtractW(*ptr);
+          sh = rfbHextileExtractH(*ptr);
+          ptr++;
           FillBufferRectangle(x+sx, y+sy, sw, sh, fg);
-	}
+        }
 
       } else {
-	if (!ReadFromRFBServer(buffer, nSubrects * 2))
-	  return False;
+        if (!ReadFromRFBServer(buffer, nSubrects * 2))
+          return False;
 
 
-	for (i = 0; i < nSubrects; i++) {
-	  sx = rfbHextileExtractX(*ptr);
-	  sy = rfbHextileExtractY(*ptr);
-	  ptr++;
-	  sw = rfbHextileExtractW(*ptr);
-	  sh = rfbHextileExtractH(*ptr);
-	  ptr++;
+        for (i = 0; i < nSubrects; i++) {
+          sx = rfbHextileExtractX(*ptr);
+          sy = rfbHextileExtractY(*ptr);
+          ptr++;
+          sw = rfbHextileExtractW(*ptr);
+          sh = rfbHextileExtractH(*ptr);
+          ptr++;
           FillBufferRectangle(x+sx, y+sy, sw, sh, fg);
-	}
+        }
       }
     }
   }

@@ -61,7 +61,7 @@ HandleRREBPP (int rx, int ry, int rw, int rh)
     subrect.h = Swap16IfLE(subrect.h);
 
     FillBufferRectangle(rx + subrect.x, ry + subrect.y,
-		   subrect.w, subrect.h, pix);
+                   subrect.w, subrect.h, pix);
   }
 
   return True;

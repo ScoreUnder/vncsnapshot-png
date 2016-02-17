@@ -204,7 +204,7 @@ int ConnectToTcpAddr(const char* hostname, int port)
   }
 
   if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY,
-		 (char *)&one, sizeof(one)) < 0) {
+                 (char *)&one, sizeof(one)) < 0) {
     fprintf(stderr,programName);
     perror(": ConnectToTcpAddr: setsockopt");
     close(sock);
@@ -273,7 +273,7 @@ int ListenAtTcpPort(int port)
   }
 
   if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
-		 (const char *)&one, sizeof(one)) < 0) {
+                 (const char *)&one, sizeof(one)) < 0) {
     fprintf(stderr,programName);
     perror(": ListenAtTcpPort: setsockopt");
     close(sock);
@@ -317,7 +317,7 @@ int AcceptTcpConnection(int listenSock)
   }
 
   if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY,
-		 (char *)&one, sizeof(one)) < 0) {
+                 (char *)&one, sizeof(one)) < 0) {
     fprintf(stderr,programName);
     perror(": AcceptTcpConnection: setsockopt");
     close(sock);
@@ -373,25 +373,25 @@ void PrintInHex(char *buf, int len)
   for (i = 0; i < len; i++)
     {
       if ((i % 16 == 0) && (i != 0)) {
-	fprintf(stderr,"           ");
+        fprintf(stderr,"           ");
       }
       c = buf[i];
       str[i % 16] = (((c > 31) && (c < 127)) ? c : '.');
       fprintf(stderr,"%02x ",(unsigned char)c);
       if ((i % 4) == 3)
-	fprintf(stderr," ");
+        fprintf(stderr," ");
       if ((i % 16) == 15)
-	{
-	  fprintf(stderr,"%s\n",str);
-	}
+        {
+          fprintf(stderr,"%s\n",str);
+        }
     }
   if ((i % 16) != 0)
     {
       for (j = i % 16; j < 16; j++)
-	{
-	  fprintf(stderr,"   ");
-	  if ((j % 4) == 3) fprintf(stderr," ");
-	}
+        {
+          fprintf(stderr,"   ");
+          if ((j % 4) == 3) fprintf(stderr," ");
+        }
       str[i % 16] = 0;
       fprintf(stderr,"%s\n",str);
     }

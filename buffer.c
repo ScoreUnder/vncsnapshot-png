@@ -209,9 +209,9 @@ write_JPEG_file (char * filename, int quality, int width, int height)
    */
   struct jpeg_error_mgr jerr;
   /* More stuff */
-  FILE * outfile;		/* target file */
-  JSAMPROW row_pointer[1];	/* pointer to JSAMPLE row[s] */
-  int row_stride;		/* physical row width in image buffer */
+  FILE * outfile;               /* target file */
+  JSAMPROW row_pointer[1];      /* pointer to JSAMPLE row[s] */
+  int row_stride;               /* physical row width in image buffer */
 
   /* Step 1: allocate and initialize JPEG compression object */
 
@@ -247,10 +247,10 @@ write_JPEG_file (char * filename, int quality, int width, int height)
   /* First we supply a description of the input image.
    * Four fields of the cinfo struct must be filled in:
    */
-  cinfo.image_width = width; 	/* image width and height, in pixels */
+  cinfo.image_width = width;    /* image width and height, in pixels */
   cinfo.image_height = height;
-  cinfo.input_components = RAW_BYTES_PER_PIXEL;		/* # of color components per pixel */
-  cinfo.in_color_space = JCS_RGB; 	/* colorspace of input image */
+  cinfo.input_components = RAW_BYTES_PER_PIXEL;         /* # of color components per pixel */
+  cinfo.in_color_space = JCS_RGB;       /* colorspace of input image */
   /* Now use the library's routine to set default compression parameters.
    * (You must set at least cinfo.in_color_space before calling this,
    * since the defaults depend on the source color space.)
@@ -282,7 +282,7 @@ write_JPEG_file (char * filename, int quality, int width, int height)
    * To keep things simple, we pass one scanline per call; you can pass
    * more if you wish, though.
    */
-  row_stride = width * 3;	/* JSAMPLEs per row in image_buffer */
+  row_stride = width * 3;       /* JSAMPLEs per row in image_buffer */
 
   while (cinfo.next_scanline < cinfo.image_height) {
     /* jpeg_write_scanlines expects an array of pointers to scanlines.
@@ -319,32 +319,32 @@ extern void write_PNG(char *filename, int interlace, int width, int height)
     FILE *outfile = fopen(filename, "wb");
 
     for (i=0; i<height; i++)
-	{
-		//row_pointers[i] = rawBuffer + i * 4 * width; //XXX
-		row_pointers[i] = & rawBuffer[i * 3 * width];
-	}
+        {
+                //row_pointers[i] = rawBuffer + i * 4 * width; //XXX
+                row_pointers[i] = & rawBuffer[i * 3 * width];
+        }
     
     if (!outfile)
     {
-	fprintf (stderr, "Error: Couldn't fopen %s.\n", filename);
-	exit(EXIT_FAILURE);
+        fprintf (stderr, "Error: Couldn't fopen %s.\n", filename);
+        exit(EXIT_FAILURE);
     }
     
     png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, 
-	(png_voidp) NULL, (png_error_ptr) NULL, (png_error_ptr) NULL);
+        (png_voidp) NULL, (png_error_ptr) NULL, (png_error_ptr) NULL);
     
     if (!png_ptr)
-	{
-		fprintf(stderr, "Error: Couldn't create PNG write struct.");
-		exit(1);
-	}
+        {
+                fprintf(stderr, "Error: Couldn't create PNG write struct.");
+                exit(1);
+        }
     
     info_ptr = png_create_info_struct(png_ptr);
     if (!info_ptr)
     {
-		png_destroy_write_struct(&png_ptr, (png_infopp) NULL);
-		fprintf(stderr, "Error: Couldn't create PNG info struct.");
-		exit(1);
+                png_destroy_write_struct(&png_ptr, (png_infopp) NULL);
+                fprintf(stderr, "Error: Couldn't create PNG info struct.");
+                exit(1);
     }
     
     png_init_io(png_ptr, outfile);
@@ -357,8 +357,8 @@ extern void write_PNG(char *filename, int interlace, int width, int height)
     //png_set_bgr(png_ptr);
 
     png_set_IHDR(png_ptr, info_ptr, width, height, 
-		 bit_depth, color_type, interlace, 
-		 PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
+                 bit_depth, color_type, interlace, 
+                 PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
     
     png_write_info(png_ptr, info_ptr);
     
@@ -371,9 +371,9 @@ extern void write_PNG(char *filename, int interlace, int width, int height)
     png_destroy_write_struct(&png_ptr, &info_ptr);
     
     if (outfile != NULL)
-	(void) fclose(outfile);
+        (void) fclose(outfile);
     /*@i2@*/ } /* tell splint to ignore false warning for not 
-		  released memory of png_ptr and info_ptr */
+                  released memory of png_ptr and info_ptr */
 
 static void
 BufferPixelToRGB(uint32_t pixel, int *r, int *g, int *b)

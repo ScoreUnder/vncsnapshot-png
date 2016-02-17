@@ -44,7 +44,7 @@ typedef uint8_t CARD8;
 // Define the port number offsets
 #define FLASH_PORT_OFFSET 5400
 #define INCOMING_PORT_OFFSET 5500
-#define HTTP_PORT_OFFSET 5800	// we don't use this in Venice
+#define HTTP_PORT_OFFSET 5800   // we don't use this in Venice
 #define RFB_PORT_OFFSET 5900
 
 #define PORT_TO_DISPLAY(p) ( (p) - RFB_PORT_OFFSET )
@@ -64,8 +64,8 @@ typedef uint8_t CARD8;
 #define Swap32IfLE(l) \
     ((CARD32) ((((l) & 0xff000000) >> 24) | \
      (((l) & 0x00ff0000) >> 8)  | \
-	 (((l) & 0x0000ff00) << 8)  | \
-	 (((l) & 0x000000ff) << 24)))
+         (((l) & 0x0000ff00) << 8)  | \
+         (((l) & 0x000000ff) << 24)))
 
 #else
 

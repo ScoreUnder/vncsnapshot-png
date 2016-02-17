@@ -115,14 +115,14 @@ Bool HandleCursorShape(int xhot, int yhot, int width, int height, CARD32 enc)
     ptr = rcSource;
     for (y = 0; y < height; y++) {
       for (x = 0; x < width / 8; x++) {
-	for (b = 7; b >= 0; b--) {
-	  *ptr = buf[y * bytesPerRow + x] >> b & 1;
-	  ptr += bytesPerPixel;
-	}
+        for (b = 7; b >= 0; b--) {
+          *ptr = buf[y * bytesPerRow + x] >> b & 1;
+          ptr += bytesPerPixel;
+        }
       }
       for (b = 7; b > 7 - width % 8; b--) {
-	*ptr = buf[y * bytesPerRow + x] >> b & 1;
-	ptr += bytesPerPixel;
+        *ptr = buf[y * bytesPerRow + x] >> b & 1;
+        ptr += bytesPerPixel;
       }
     }
 
@@ -130,19 +130,19 @@ Bool HandleCursorShape(int xhot, int yhot, int width, int height, CARD32 enc)
     switch (bytesPerPixel) {
     case 1:
       for (x = 0; x < width * height; x++)
-	rcSource[x] = (CARD8)colors[rcSource[x]];
+        rcSource[x] = (CARD8)colors[rcSource[x]];
       break;
     case 2:
       for (x = 0; x < width * height; x++)
-	((CARD16 *)rcSource)[x] = (CARD16)colors[rcSource[x * 2]];
+        ((CARD16 *)rcSource)[x] = (CARD16)colors[rcSource[x * 2]];
       break;
     case 4:
       for (x = 0; x < width * height; x++)
-	((CARD32 *)rcSource)[x] = colors[rcSource[x * 4]];
+        ((CARD32 *)rcSource)[x] = colors[rcSource[x * 4]];
       break;
     }
 
-  } else {			/* enc == rfbEncodingRichCursor */
+  } else {                      /* enc == rfbEncodingRichCursor */
 
     if (!ReadFromRFBServer((char *)rcSource, width * height * bytesPerPixel)) {
       free(rcSource);
@@ -171,7 +171,7 @@ Bool HandleCursorShape(int xhot, int yhot, int width, int height, CARD32 enc)
   for (y = 0; y < height; y++) {
     for (x = 0; x < width / 8; x++) {
       for (b = 7; b >= 0; b--) {
-	*ptr++ = buf[y * bytesPerRow + x] >> b & 1;
+        *ptr++ = buf[y * bytesPerRow + x] >> b & 1;
       }
     }
     for (b = 7; b > 7 - width % 8; b--) {
@@ -315,9 +315,9 @@ void SoftCursorMove(int x, int y)
 static Bool SoftCursorInLockedArea(void)
 {
   return (rcLockX < rcCursorX - rcHotX + rcWidth &&
-	  rcLockY < rcCursorY - rcHotY + rcHeight &&
-	  rcLockX + rcLockWidth > rcCursorX - rcHotX &&
-	  rcLockY + rcLockHeight > rcCursorY - rcHotY);
+          rcLockY < rcCursorY - rcHotY + rcHeight &&
+          rcLockX + rcLockWidth > rcCursorX - rcHotX &&
+          rcLockY + rcLockHeight > rcCursorY - rcHotY);
 }
 
 static void SoftCursorCopyArea(int oper)
@@ -370,14 +370,14 @@ static void SoftCursorDraw(void)
     y0 = rcCursorY - rcHotY + y;
     if (y0 >= 0 && y0 < si.framebufferHeight) {
       for (x = 0; x < rcWidth; x++) {
-	x0 = rcCursorX - rcHotX + x;
-	if (x0 >= 0 && x0 < si.framebufferWidth) {
-	  offset = y * rcWidth + x;
-	  if (rcMask[offset]) {
-	    pos = (char *)&rcSource[offset * bytesPerPixel];
-	    CopyDataToScreen(pos, x0, y0, 1, 1);
-	  }
-	}
+        x0 = rcCursorX - rcHotX + x;
+        if (x0 >= 0 && x0 < si.framebufferWidth) {
+          offset = y * rcWidth + x;
+          if (rcMask[offset]) {
+            pos = (char *)&rcSource[offset * bytesPerPixel];
+            CopyDataToScreen(pos, x0, y0, 1, 1);
+          }
+        }
       }
     }
   }

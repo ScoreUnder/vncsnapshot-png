@@ -40,27 +40,27 @@ HandleCoRREBPP (int rx, int ry, int rw, int rh)
     int x, y, w, h;
 
     if (!ReadFromRFBServer((char *)&hdr, sz_rfbRREHeader))
-	return False;
+        return False;
 
     hdr.nSubrects = Swap32IfLE(hdr.nSubrects);
 
     if (!ReadFromRFBServer((char *)&pix, sizeof(pix)))
-	return False;
+        return False;
 
     FillBufferRectangle(rx, ry, rw, rh, pix);
 
     if (!ReadFromRFBServer(buffer, hdr.nSubrects * (4 + (BPP / 8))))
-	return False;
+        return False;
 
     ptr = (CARD8 *)buffer;
 
     for (i = 0; i < hdr.nSubrects; i++) {
-	pix = *(CARDBPP *)ptr;
-	ptr += BPP/8;
-	x = *ptr++;
-	y = *ptr++;
-	w = *ptr++;
-	h = *ptr++;
+        pix = *(CARDBPP *)ptr;
+        ptr += BPP/8;
+        x = *ptr++;
+        y = *ptr++;
+        w = *ptr++;
+        h = *ptr++;
 
         FillBufferRectangle(rx + x, ry + y, w, h, pix);
     }

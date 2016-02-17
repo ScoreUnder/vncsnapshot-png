@@ -37,8 +37,8 @@ typedef int SOCKET;
 
 #include "vncsnapshot.h"
 
-#define FLASHWIDTH 50	/* pixels */
-#define FLASHDELAY 1	/* seconds */
+#define FLASHWIDTH 50   /* pixels */
+#define FLASHDELAY 1    /* seconds */
 
 Bool listenSpecified = False;
 int listenPort = 0, flashPort = 0;
@@ -63,7 +63,7 @@ listenForIncomingConnections(int *argc, char **argv, int listenArgIndex)
   listenSpecified = True;
 
   if (listenArgIndex+1 < *argc && argv[listenArgIndex+1][0] >= '0' &&
-					    argv[listenArgIndex+1][0] <= '9') {
+                                            argv[listenArgIndex+1][0] <= '9') {
 
     listenPort = LISTEN_PORT_OFFSET + atoi(argv[listenArgIndex+1]);
     flashPort = FLASH_PORT_OFFSET + atoi(argv[listenArgIndex+1]);
@@ -81,9 +81,9 @@ listenForIncomingConnections(int *argc, char **argv, int listenArgIndex)
   if ((listenSocket < 0) || (flashSocket < 0)) exit(1);
 
   fprintf(stderr,"%s -listen: Listening on port %d (flash port %d)\n",
-	  programName,listenPort,flashPort);
+          programName,listenPort,flashPort);
   fprintf(stderr,"%s -listen: Command line errors are not reported until "
-	  "a connection comes in.\n", programName);
+          "a connection comes in.\n", programName);
 
   while (True) {
 
@@ -106,7 +106,7 @@ listenForIncomingConnections(int *argc, char **argv, int listenArgIndex)
       if (sock < 0) exit(1);
       n = recv(sock, flashUser, 255, 0);
       if (n > 0) {
-	flashUser[n] = 0;
+        flashUser[n] = 0;
       }
       close(sock);
     }

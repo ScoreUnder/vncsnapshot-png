@@ -47,9 +47,9 @@ extern int endianTest;
 
 #define Swap32IfLE(l) \
     (*(char *)&endianTest ? ((((l) & 0xff000000) >> 24) | \
-			     (((l) & 0x00ff0000) >> 8)  | \
-			     (((l) & 0x0000ff00) << 8)  | \
-			     (((l) & 0x000000ff) << 24))  : (l))
+                             (((l) & 0x00ff0000) >> 8)  | \
+                             (((l) & 0x0000ff00) << 8)  | \
+                             (((l) & 0x000000ff) << 24))  : (l))
 
 #define MAX_ENCODINGS 20
 
@@ -110,7 +110,7 @@ typedef struct {
   int32_t rectY;
   char gotCursorPos;
   int fps;
-  int count;	/* number of snapshots to grab */
+  int count;    /* number of snapshots to grab */
 } AppData;
 
 extern AppData appData;
@@ -171,7 +171,7 @@ extern Bool SendSetPixelFormat();
 extern Bool SendSetEncodings();
 extern Bool SendIncrementalFramebufferUpdateRequest();
 extern Bool SendFramebufferUpdateRequest(int x, int y, int w, int h,
-					 Bool incremental);
+                                         Bool incremental);
 extern Bool SendPointerEvent(int x, int y, int buttonMask);
 extern Bool SendKeyEvent(CARD32 key, Bool down);
 extern Bool SendClientCutText(char *str, int len);

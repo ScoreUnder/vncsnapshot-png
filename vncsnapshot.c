@@ -73,7 +73,7 @@ main(int argc, char **argv)
     }
     if (strcmp(argv[i], "-tunnel") == 0 || strcmp(argv[i], "-via") == 0) {
       if (!createTunnel(&argc, argv, i))
-	exit(1);
+        exit(1);
       break;
     }
   }
@@ -142,7 +142,7 @@ main(int argc, char **argv)
           i = 0;
           while (cp[i+1]) {
               if (tolower(cp[i+1]) != png[i]) {
-				  cp = NULL;
+                                  cp = NULL;
                   break;
               }
               i++;
@@ -185,12 +185,12 @@ main(int argc, char **argv)
     }
     if (appData.rectX >= si.framebufferWidth || appData.rectX < 0) {
       fprintf(stderr, "%s: Requested rectangle x <%ld> is outside screen width <%d>, using 0\n",
-	      programName, appData.rectX, si.framebufferWidth);
+              programName, appData.rectX, si.framebufferWidth);
       appData.rectX = 0;
     }
     if (appData.rectY >= si.framebufferHeight || appData.rectY < 0) {
       fprintf(stderr, "%s: Requested rectangle y <%ld> is outside screen height <%d>, using 0\n",
-	      programName, appData.rectY, si.framebufferHeight);
+              programName, appData.rectY, si.framebufferHeight);
       appData.rectY = 0;
     }
 
@@ -205,22 +205,22 @@ main(int argc, char **argv)
     }
     if (appData.rectWidth <= 0 || appData.rectWidth > si.framebufferWidth - appData.rectX) {
       fprintf(stderr, "%s: Requested rectangle width <%ld> plus offset <%ld> is wider than screen width <%d>, using %ld\n",
-	      programName, appData.rectWidth, appData.rectX, si.framebufferWidth, si.framebufferWidth - appData.rectX);
+              programName, appData.rectWidth, appData.rectX, si.framebufferWidth, si.framebufferWidth - appData.rectX);
       appData.rectWidth = si.framebufferWidth - appData.rectX;
     }
     if (appData.rectHeight <= 0 || appData.rectHeight > si.framebufferHeight - appData.rectY) {
       fprintf(stderr, "%s: Requested rectangle height <%ld> plus offset <%ld> is wider than screen height <%d>, using %ld\n",
-	      programName, appData.rectHeight, appData.rectY, si.framebufferHeight, si.framebufferHeight - appData.rectY);
+              programName, appData.rectHeight, appData.rectY, si.framebufferHeight, si.framebufferHeight - appData.rectY);
       appData.rectHeight = si.framebufferHeight - appData.rectY;
     }
     if (!SendFramebufferUpdateRequest(appData.rectX, appData.rectY, appData.rectWidth,
-				      appData.rectHeight, False)) {
+                                      appData.rectHeight, False)) {
       exit(1);
     }
 
     while (1) {
       if (!HandleRFBServerMessage())
-	break;
+        break;
     }
 
     /* shrink buffer to requested rectangle */
@@ -231,18 +231,18 @@ main(int argc, char **argv)
       fprintf(stderr, "Image saved from %s %dx%d screen to ", vncServerName ? vncServerName : "(local host)",
               si.framebufferWidth, si.framebufferHeight);
       if (strcmp(filename, "-") == 0) {
-	fprintf(stderr, "- (stdout)");
+        fprintf(stderr, "- (stdout)");
       } else {
-	fprintf(stderr, "%s", filename);
+        fprintf(stderr, "%s", filename);
       }
       fprintf(stderr, " using %ldx%ld+%ld+%ld rectangle\n", appData.rectWidth, appData.rectHeight,
               appData.rectX, appData.rectY);
       if (appData.useRemoteCursor != -1 && !appData.gotCursorPos) {
-	if (appData.useRemoteCursor) {
-	  fprintf(stderr, "Warning: -cursor not supported by server, cursor may not be included in image.\n");
-	} else {
-	  fprintf(stderr, "Warning: -nocursor not supported by server, cursor may be included in image.\n");
-	}
+        if (appData.useRemoteCursor) {
+          fprintf(stderr, "Warning: -cursor not supported by server, cursor may not be included in image.\n");
+        } else {
+          fprintf(stderr, "Warning: -nocursor not supported by server, cursor may be included in image.\n");
+        }
       }
     }
 
@@ -256,8 +256,8 @@ main(int argc, char **argv)
             sleep(last_time + appData.fps - now);
         }
         last_time = now;
-	/* Request update - incremental is fine here. */
-	SendIncrementalFramebufferUpdateRequest();
+        /* Request update - incremental is fine here. */
+        SendIncrementalFramebufferUpdateRequest();
     }
   } while (count < appData.count);
 
