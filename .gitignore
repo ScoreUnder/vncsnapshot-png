@@ -1,0 +1,7 @@
+# ctags
+tags
+# Artifacts
+*.o
+*.a
+vncpasswd
+vncsnapshot
