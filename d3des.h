@@ -29,12 +29,12 @@ extern void deskey(unsigned char *, int);
  * for encryption or decryption according to MODE.
  */
 
-extern void usekey(unsigned long *);
+extern void usekey(uint32_t *);
 /*                  cookedkey[32]
  * Loads the internal key register with the data in cookedkey.
  */
 
-extern void cpkey(unsigned long *);
+extern void cpkey(uint32_t *);
 /*                 cookedkey[32]
  * Copies the contents of the internal key register into the storage
  * located at &cookedkey[0].

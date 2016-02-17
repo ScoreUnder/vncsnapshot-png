@@ -22,6 +22,7 @@
  */
 static const char *ID = "$Id: argsresources.c,v 1.7 2004/09/09 19:18:21 grmcdorman Exp $";
 
+#include <stdint.h>
 #include "vncsnapshot.h"
 #include "version.h"
 
@@ -197,8 +198,8 @@ GetArgsAndResources(int argc, char **argv)
         /* We could use sscanf, but the return value is not consistent
          * across all platforms.
          */
-        long w, h;
-        long x, y;
+        int32_t w, h;
+        int32_t x, y;
         char *end = NULL;
 
         w = strtol(rect, &end, 10);

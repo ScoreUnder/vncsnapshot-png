@@ -25,6 +25,7 @@
  */
 static const char *ID = "$Id: rfbproto.c,v 1.6 2004/09/09 00:22:33 grmcdorman Exp $";
 
+#include <stdint.h>
 #ifdef WIN32
 #include "vncauth.h"
 
@@ -53,12 +54,12 @@ static Bool HandleHextile32(int rx, int ry, int rw, int rh);
 static Bool HandleZlib32(int rx, int ry, int rw, int rh);
 static Bool HandleTight32(int rx, int ry, int rw, int rh);
 
-static long ReadCompactLen (void);
+static uint32_t ReadCompactLen (void);
 
 /* JPEG */
 static void JpegInitSource(j_decompress_ptr cinfo);
 static boolean JpegFillInputBuffer(j_decompress_ptr cinfo);
-static void JpegSkipInputData(j_decompress_ptr cinfo, long num_bytes);
+static void JpegSkipInputData(j_decompress_ptr cinfo, int32_t num_bytes);
 static void JpegTermSource(j_decompress_ptr cinfo);
 static void JpegSetSrcManager(j_decompress_ptr cinfo, CARD8 *compressedData,
                               int compressedLen);
@@ -278,7 +279,7 @@ InitialiseRFBConnection()
   desktopName = malloc(si.nameLength + 1);
   if (!desktopName) {
     fprintf(stderr, "Error allocating memory for desktop name, %lu bytes\n",
-            (unsigned long)si.nameLength);
+            (uint32_t)si.nameLength);
     return False;
   }
 
@@ -793,10 +794,10 @@ PrintPixelFormat(format)
   }
 }
 
-static long
+static uint32_t
 ReadCompactLen (void)
 {
-  long len;
+  uint32_t len;
   CARD8 b;
 
   if (!ReadFromRFBServer((char *)&b, 1))
@@ -840,7 +841,7 @@ JpegFillInputBuffer(j_decompress_ptr cinfo)
 }
 
 static void
-JpegSkipInputData(j_decompress_ptr cinfo, long num_bytes)
+JpegSkipInputData(j_decompress_ptr cinfo, int32_t num_bytes)
 {
   if (num_bytes < 0 || (unsigned int) num_bytes > jpegSrcManager.bytes_in_buffer) {
     jpegError = True;

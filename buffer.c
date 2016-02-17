@@ -32,7 +32,7 @@ static const char *ID = "$Id: buffer.c,v 1.6 2004/09/09 00:22:33 grmcdorman Exp 
 
 #include <png.h>      /* PNG lib */
 
-static void BufferPixelToRGB(unsigned long pixel, int *r, int *g, int *b);
+static void BufferPixelToRGB(uint32_t pixel, int *r, int *g, int *b);
 
 static char * rawBuffer = NULL;
 static char   bufferBlank = 1;
@@ -45,7 +45,7 @@ static char   bufferWritten = 0;
 int
 AllocateBuffer()
 {
-    unsigned long bytes;
+    uint32_t bytes;
     static const short testEndian = 1;
     int bigEndian;
 
@@ -149,7 +149,7 @@ CopyScreenToData(int x, int y, int w, int h)
 }
 
 void
-FillBufferRectangle(int x, int y, int w, int h, unsigned long pixel)
+FillBufferRectangle(int x, int y, int w, int h, uint32_t pixel)
 {
     int r, g, b;
     int start;
@@ -376,7 +376,7 @@ extern void write_PNG(char *filename, int interlace, int width, int height)
 		  released memory of png_ptr and info_ptr */
 
 static void
-BufferPixelToRGB(unsigned long pixel, int *r, int *g, int *b)
+BufferPixelToRGB(uint32_t pixel, int *r, int *g, int *b)
 {
     *r = (pixel >> myFormat.redShift) & myFormat.redMax;
     *b = (pixel >> myFormat.blueShift) & myFormat.blueMax;
@@ -384,7 +384,7 @@ BufferPixelToRGB(unsigned long pixel, int *r, int *g, int *b)
 }
 
 void
-ShrinkBuffer(long x, long y, long req_width, long req_height)
+ShrinkBuffer(int32_t x, int32_t y, int32_t req_width, int32_t req_height)
 {
     int start;
     int stride;

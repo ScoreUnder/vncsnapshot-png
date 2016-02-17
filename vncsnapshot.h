@@ -104,10 +104,10 @@ typedef struct {
 
   char rectXNegative; /* if non-zero, X or Y relative to opposite edge */
   char rectYNegative;
-  long rectWidth;
-  long rectHeight;
-  long rectX;
-  long rectY;
+  int32_t rectWidth;
+  int32_t rectHeight;
+  int32_t rectX;
+  int32_t rectY;
   char gotCursorPos;
   int fps;
   int count;	/* number of snapshots to grab */
@@ -129,10 +129,10 @@ extern void GetArgsAndResources(int argc, char **argv);
 
 /* buffer.c */
 extern int AllocateBuffer();
-extern void CopyDataToScreen(char *buffer, int x, int y, int w, int h);
-extern char *CopyScreenToData(int x, int y, int w, int h);
-extern void FillBufferRectangle(int x, int y, int w, int h, unsigned long pixel);
-extern void ShrinkBuffer(long x, long y, long req_width, long req_height);
+extern void CopyDataToScreen(char *buffer, int32_t x, int32_t y, int32_t w, int32_t h);
+extern char *CopyScreenToData(int32_t x, int32_t y, int32_t w, int32_t h);
+extern void FillBufferRectangle(int32_t x, int32_t y, int32_t w, int32_t h, uint32_t pixel);
+extern void ShrinkBuffer(int32_t x, int32_t y, int32_t req_width, int32_t req_height);
 extern void write_JPEG_file (char * filename, int quality, int width, int height);
 extern void write_PNG (char * filename, int quality, int width, int height);
 extern int BufferIsBlank();
@@ -140,7 +140,7 @@ extern int BufferWritten();
 
 /* colour.c */
 
-extern unsigned long BGR233ToPixel[];
+extern uint32_t BGR233ToPixel[];
 
 
 /* cursor.c */

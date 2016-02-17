@@ -26,16 +26,17 @@
  * (GEnie : OUTER; CIS : [71755,204]) Graven Imagery, 1992.
  */
 
+#include <stdint.h>
 #include "d3des.h"
 
-static void scrunch(unsigned char *, unsigned long *);
-static void unscrun(unsigned long *, unsigned char *);
-static void desfunc(unsigned long *, unsigned long *);
-static void cookey(unsigned long *);
+static void scrunch(unsigned char *, uint32_t *);
+static void unscrun(uint32_t *, unsigned char *);
+static void desfunc(uint32_t *, uint32_t *);
+static void cookey(uint32_t *);
 
-static unsigned long KnL[32] = { 0L };
-/*static unsigned long KnR[32] = { 0L };*/
-/*static unsigned long Kn3[32] = { 0L };*/
+static uint32_t KnL[32] = { 0L };
+/*static uint32_t KnR[32] = { 0L };*/
+/*static uint32_t Kn3[32] = { 0L };*/
 /*static unsigned char Df_Key[24] = {
         0x01,0x23,0x45,0x67,0x89,0xab,0xcd,0xef,
         0xfe,0xdc,0xba,0x98,0x76,0x54,0x32,0x10,
@@ -44,7 +45,7 @@ static unsigned long KnL[32] = { 0L };
 static unsigned short bytebit[8]        = {
         01, 02, 04, 010, 020, 040, 0100, 0200 };
 
-static unsigned long bigbyte[24] = {
+static uint32_t bigbyte[24] = {
         0x800000L,      0x400000L,      0x200000L,      0x100000L,
         0x80000L,       0x40000L,       0x20000L,       0x10000L,
         0x8000L,        0x4000L,        0x2000L,        0x1000L,
@@ -75,7 +76,7 @@ int edf;
 {
         register int i, j, l, m, n;
         unsigned char pc1m[56], pcr[56];
-        unsigned long kn[32];
+        uint32_t kn[32];
 
         for ( j = 0; j < 56; j++ ) {
                 l = pc1[j];
@@ -107,10 +108,10 @@ int edf;
         }
 
 static void cookey(raw1)
-register unsigned long *raw1;
+register uint32_t *raw1;
 {
-        register unsigned long *cook, *raw0;
-        unsigned long dough[32];
+        register uint32_t *cook, *raw0;
+        uint32_t dough[32];
         register int i;
 
         cook = dough;
@@ -130,9 +131,9 @@ register unsigned long *raw1;
         }
 
 void cpkey(into)
-register unsigned long *into;
+register uint32_t *into;
 {
-        register unsigned long *from, *endp;
+        register uint32_t *from, *endp;
 
         from = KnL, endp = &KnL[32];
         while( from < endp ) *into++ = *from++;
@@ -140,9 +141,9 @@ register unsigned long *into;
         }
 
 void usekey(from)
-register unsigned long *from;
+register uint32_t *from;
 {
-        register unsigned long *to, *endp;
+        register uint32_t *to, *endp;
 
         to = KnL, endp = &KnL[32];
         while( to < endp ) *to++ = *from++;
@@ -152,7 +153,7 @@ register unsigned long *from;
 void des(inblock, outblock)
 unsigned char *inblock, *outblock;
 {
-        unsigned long work[2];
+        uint32_t work[2];
 
         scrunch(inblock, work);
         desfunc(work, KnL);
@@ -162,7 +163,7 @@ unsigned char *inblock, *outblock;
 
 static void scrunch(outof, into)
 register unsigned char *outof;
-register unsigned long *into;
+register uint32_t *into;
 {
         *into    = (*outof++ & 0xffL) << 24;
         *into   |= (*outof++ & 0xffL) << 16;
@@ -176,7 +177,7 @@ register unsigned long *into;
         }
 
 static void unscrun(outof, into)
-register unsigned long *outof;
+register uint32_t *outof;
 register unsigned char *into;
 {
         *into++ = (unsigned char) ((*outof >> 24) & 0xffL);
@@ -190,7 +191,7 @@ register unsigned char *into;
         return;
         }
 
-static unsigned long SP1[64] = {
+static uint32_t SP1[64] = {
         0x01010400L, 0x00000000L, 0x00010000L, 0x01010404L,
         0x01010004L, 0x00010404L, 0x00000004L, 0x00010000L,
         0x00000400L, 0x01010400L, 0x01010404L, 0x00000400L,
@@ -208,7 +209,7 @@ static unsigned long SP1[64] = {
         0x00000404L, 0x01000400L, 0x01000400L, 0x00000000L,
         0x00010004L, 0x00010400L, 0x00000000L, 0x01010004L };
 
-static unsigned long SP2[64] = {
+static uint32_t SP2[64] = {
         0x80108020L, 0x80008000L, 0x00008000L, 0x00108020L,
         0x00100000L, 0x00000020L, 0x80100020L, 0x80008020L,
         0x80000020L, 0x80108020L, 0x80108000L, 0x80000000L,
@@ -226,7 +227,7 @@ static unsigned long SP2[64] = {
         0x00108000L, 0x00000000L, 0x80008000L, 0x00008020L,
         0x80000000L, 0x80100020L, 0x80108020L, 0x00108000L };
 
-static unsigned long SP3[64] = {
+static uint32_t SP3[64] = {
         0x00000208L, 0x08020200L, 0x00000000L, 0x08020008L,
         0x08000200L, 0x00000000L, 0x00020208L, 0x08000200L,
         0x00020008L, 0x08000008L, 0x08000008L, 0x00020000L,
@@ -244,7 +245,7 @@ static unsigned long SP3[64] = {
         0x08020000L, 0x08000208L, 0x00000208L, 0x08020000L,
         0x00020208L, 0x00000008L, 0x08020008L, 0x00020200L };
 
-static unsigned long SP4[64] = {
+static uint32_t SP4[64] = {
         0x00802001L, 0x00002081L, 0x00002081L, 0x00000080L,
         0x00802080L, 0x00800081L, 0x00800001L, 0x00002001L,
         0x00000000L, 0x00802000L, 0x00802000L, 0x00802081L,
@@ -262,7 +263,7 @@ static unsigned long SP4[64] = {
         0x00002001L, 0x00002080L, 0x00800000L, 0x00802001L,
         0x00000080L, 0x00800000L, 0x00002000L, 0x00802080L };
 
-static unsigned long SP5[64] = {
+static uint32_t SP5[64] = {
         0x00000100L, 0x02080100L, 0x02080000L, 0x42000100L,
         0x00080000L, 0x00000100L, 0x40000000L, 0x02080000L,
         0x40080100L, 0x00080000L, 0x02000100L, 0x40080100L,
@@ -280,7 +281,7 @@ static unsigned long SP5[64] = {
         0x00080100L, 0x02000100L, 0x40000100L, 0x00080000L,
         0x00000000L, 0x40080000L, 0x02080100L, 0x40000100L };
 
-static unsigned long SP6[64] = {
+static uint32_t SP6[64] = {
         0x20000010L, 0x20400000L, 0x00004000L, 0x20404010L,
         0x20400000L, 0x00000010L, 0x20404010L, 0x00400000L,
         0x20004000L, 0x00404010L, 0x00400000L, 0x20000010L,
@@ -298,7 +299,7 @@ static unsigned long SP6[64] = {
         0x00004000L, 0x00400010L, 0x20004010L, 0x00000000L,
         0x20404000L, 0x20000000L, 0x00400010L, 0x20004010L };
 
-static unsigned long SP7[64] = {
+static uint32_t SP7[64] = {
         0x00200000L, 0x04200002L, 0x04000802L, 0x00000000L,
         0x00000800L, 0x04000802L, 0x00200802L, 0x04200800L,
         0x04200802L, 0x00200000L, 0x00000000L, 0x04000002L,
@@ -316,7 +317,7 @@ static unsigned long SP7[64] = {
         0x00000000L, 0x00200802L, 0x04200000L, 0x00000800L,
         0x04000002L, 0x04000800L, 0x00000800L, 0x00200002L };
 
-static unsigned long SP8[64] = {
+static uint32_t SP8[64] = {
         0x10001040L, 0x00001000L, 0x00040000L, 0x10041040L,
         0x10000000L, 0x10001040L, 0x00000040L, 0x10000000L,
         0x00040040L, 0x10040000L, 0x10041040L, 0x00041000L,
@@ -335,9 +336,9 @@ static unsigned long SP8[64] = {
         0x00001040L, 0x00040040L, 0x10000000L, 0x10041000L };
 
 static void desfunc(block, keys)
-register unsigned long *block, *keys;
+register uint32_t *block, *keys;
 {
-        register unsigned long fval, work, right, leftt;
+        register uint32_t fval, work, right, leftt;
         register int round;
 
         leftt = block[0];
