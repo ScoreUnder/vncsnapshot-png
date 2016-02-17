@@ -538,14 +538,8 @@ HandleRFBServerMessage()
       rect.r.w = Swap16IfLE(rect.r.w);
       rect.r.h = Swap16IfLE(rect.r.h);
 
-      if (rect.encoding == rfbEncodingXCursor) {
-        if (!HandleCursorShape(rect.r.x, rect.r.y, rect.r.w, rect.r.h, rfbEncodingXCursor)) {
-          return False;
-        }
-        continue;
-      }
-      if (rect.encoding == rfbEncodingRichCursor) {
-        if (!HandleCursorShape(rect.r.x, rect.r.y, rect.r.w, rect.r.h, rfbEncodingRichCursor)) {
+      if (rect.encoding == rfbEncodingXCursor || rect.encoding == rfbEncodingRichCursor) {
+        if (!HandleCursorShape(rect.r.x, rect.r.y, rect.r.w, rect.r.h, rect.encoding)) {
           return False;
         }
         continue;
