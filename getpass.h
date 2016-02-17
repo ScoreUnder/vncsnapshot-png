@@ -1,5 +1,4 @@
 /*
- *  Copyright (C) 2016 Score_Under. All Rights Reserved.
  *  Copyright (C) 2000, 2001 Const Kaplinsky.  All Rights Reserved.
  *  Copyright (C) 2000 Tridia Corporation.  All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
@@ -20,36 +19,7 @@
  *  USA.
  */
 
-#include "getpass.h"
-#include <stdio.h>
-#include <string.h>
-#include <stdbool.h>
-#include <termios.h>
-#include <unistd.h>
-
-static char buffer[512];
-
-char *getpass(const char * prompt)
-{
-    struct termios old_termios;
-    bool have_termios = tcgetattr(STDIN_FILENO, &old_termios) == 0;
-
-    if (have_termios) {
-        struct termios new_termios = old_termios;
-        new_termios.c_lflag &= (tcflag_t) ~ECHO;
-        tcsetattr(STDIN_FILENO, TCSANOW, &new_termios);
-    }
-
-    fputs(prompt, stdout);
-    char *fgets_result = fgets(buffer, sizeof buffer, stdin);
-    tcsetattr(STDIN_FILENO, TCSANOW, &old_termios);
-    if (!fgets_result)
-        return NULL;
-
-    size_t len = strlen(buffer);
-    if (len > 0 && buffer[len - 1] == '\n')
-        buffer[len - 1] = 0;
-
-    return buffer;
-}
-
+#ifndef GETPASS_H
+#define GETPASS_H
+char *getpass(const char * prompt);
+#endif

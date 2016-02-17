@@ -24,6 +24,7 @@ SRCS = \
   tunnel.c \
   vncsnapshot.c \
   d3des.c vncauth.c \
+  getpass.c \
   zrle.cxx
 
 OBJS1 = $(SRCS:.cxx=.o)

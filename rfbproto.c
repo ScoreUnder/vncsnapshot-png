@@ -46,6 +46,8 @@
 #include <jpeglib.h>
 #undef INT16
 
+#include "getpass.h"
+
 /* do not need non-32 bit versions of these */
 static Bool HandleRRE32(int rx, int ry, int rw, int rh);
 static Bool HandleCoRRE32(int rx, int ry, int rw, int rh);
