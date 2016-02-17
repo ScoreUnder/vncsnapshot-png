@@ -2,7 +2,7 @@
 
 SRCS = \
 	FdInStream.cxx   InStream.cxx       ZlibInStream.cxx \
-	FdOutStream.cxx  NullOutStream.cxx  ZlibOutStream.cxx
+	FdOutStream.cxx  ZlibOutStream.cxx
 
 OBJS1 = $(SRCS:.c=.o)
 OBJS  = $(OBJS1:.cxx=.o)
