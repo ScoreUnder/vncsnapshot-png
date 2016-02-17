@@ -26,8 +26,6 @@ SRCS = \
   d3des.c vncauth.c \
   zrle.cxx
 
-PASSWD_SRCS =  vncpasswd.c vncauth.c d3des.c
-
 OBJS1 = $(SRCS:.cxx=.o)
 OBJS  = $(OBJS1:.c=.o)
 
@@ -36,16 +34,13 @@ PASSWD_OBJS  = $(PASSWD_OBJS1:.cxx=.o)
 
 SUBDIRS=rdr.dir
 
-all: $(SUBDIRS:.dir=.all) vncsnapshot vncpasswd
+all: $(SUBDIRS:.dir=.all) vncsnapshot
 
 vncsnapshot: $(OBJS)
 	$(LINK.cc) $(CFLAGS) -o $@ $(OBJS) rdr/librdr.a $(LIBS)
 
-vncpasswd: $(PASSWD_OBJS)
-	$(LINK.c) $(CFLAGS) -o $@ $(PASSWD_OBJS)
-
 clean: $(SUBDIRS:.dir=.clean) $(FINAL_SUBDIRS:.dir=.clean)
-	-rm -f $(OBJS) $(PASSWD_OBJS) vncpasswd vncsnapshot core
+	-rm -f $(OBJS) $(PASSWD_OBJS) vncsnapshot
 
 reallyclean: clean $(SUBDIRS:.dir=.reallyclean) $(FINAL_SUBDIRS:.dir=.reallyclean)
 	-rm -f *~
@@ -76,4 +71,3 @@ tunnel.o: tunnel.c vncsnapshot.h rfb.h rfbproto.h
 vncsnapshot.o: vncsnapshot.c vncsnapshot.h rfb.h rfbproto.h
 vncauth.o: vncauth.c stdhdrs.h rfb.h rfbproto.h vncauth.h d3des.h
 zrle.o: zrle.cxx vncsnapshot.h
-vncpasswd.o: vncpasswd.c vncauth.h
