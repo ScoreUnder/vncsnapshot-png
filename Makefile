@@ -22,7 +22,7 @@ EXTRAINCLUDES =
 
 # Compilation Flags. Season to taste.
 CC = gcc
-CDEBUGFLAGS = -O2 -Wall
+export CDEBUGFLAGS = -O2 -Wall -Wextra
 CXX=g++
 # You shouldn't need to change anything below.
 INCLUDES = -I. $(ZLIB_INCLUDE) $(JPEG_INCLUDE) $(EXTRAINCLUDES)
@@ -75,18 +75,18 @@ reallyclean: clean $(SUBDIRS:.dir=.reallyclean) $(FINAL_SUBDIRS:.dir=.reallyclea
 	-rm -f *~
 
 rdr.all:
-	cd rdr;make all
+	cd rdr;$(MAKE) all
 rdr.clean:
-	cd rdr;make clean
+	cd rdr;$(MAKE) clean
 rdr.reallyclean:
-	cd rdr;make reallyclean
+	cd rdr;$(MAKE) reallyclean
 
 vncpasswd.all:
-	cd vncpasswd;make all
+	cd vncpasswd;$(MAKE) all
 vncpasswd.clean:
-	cd vncpasswd;make clean
+	cd vncpasswd;$(MAKE) clean
 vncpasswd.reallyclean:
-	cd vncpasswd;make reallyclean
+	cd vncpasswd;$(MAKE) reallyclean
 
 .cxx.o:
 	$(COMPILE.cc) -o $@ $<
