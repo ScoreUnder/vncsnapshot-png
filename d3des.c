@@ -117,14 +117,14 @@ register uint32_t *raw1;
         cook = dough;
         for( i = 0; i < 16; i++, raw1++ ) {
                 raw0 = raw1++;
-                *cook    = (*raw0 & 0x00fc0000L) << 6;
-                *cook   |= (*raw0 & 0x00000fc0L) << 10;
-                *cook   |= (*raw1 & 0x00fc0000L) >> 10;
-                *cook++ |= (*raw1 & 0x00000fc0L) >> 6;
-                *cook    = (*raw0 & 0x0003f000L) << 12;
-                *cook   |= (*raw0 & 0x0000003fL) << 16;
-                *cook   |= (*raw1 & 0x0003f000L) >> 4;
-                *cook++ |= (*raw1 & 0x0000003fL);
+                *cook    = (uint32_t) ((*raw0 & 0x00fc0000L) << 6);
+                *cook   |= (uint32_t) ((*raw0 & 0x00000fc0L) << 10);
+                *cook   |= (uint32_t) ((*raw1 & 0x00fc0000L) >> 10);
+                *cook++ |= (uint32_t) ((*raw1 & 0x00000fc0L) >> 6);
+                *cook    = (uint32_t) ((*raw0 & 0x0003f000L) << 12);
+                *cook   |= (uint32_t) ((*raw0 & 0x0000003fL) << 16);
+                *cook   |= (uint32_t) ((*raw1 & 0x0003f000L) >> 4);
+                *cook++ |= (uint32_t) ((*raw1 & 0x0000003fL));
                 }
         usekey(dough);
         return;
@@ -165,14 +165,14 @@ static void scrunch(outof, into)
 register unsigned char *outof;
 register uint32_t *into;
 {
-        *into    = (*outof++ & 0xffL) << 24;
-        *into   |= (*outof++ & 0xffL) << 16;
-        *into   |= (*outof++ & 0xffL) << 8;
-        *into++ |= (*outof++ & 0xffL);
-        *into    = (*outof++ & 0xffL) << 24;
-        *into   |= (*outof++ & 0xffL) << 16;
-        *into   |= (*outof++ & 0xffL) << 8;
-        *into   |= (*outof   & 0xffL);
+        *into    = (uint32_t) ((*outof++ & 0xffL) << 24);
+        *into   |= (uint32_t) ((*outof++ & 0xffL) << 16);
+        *into   |= (uint32_t) ((*outof++ & 0xffL) << 8);
+        *into++ |= (uint32_t) ((*outof++ & 0xffL));
+        *into    = (uint32_t) ((*outof++ & 0xffL) << 24);
+        *into   |= (uint32_t) ((*outof++ & 0xffL) << 16);
+        *into   |= (uint32_t) ((*outof++ & 0xffL) << 8);
+        *into   |= (uint32_t) ((*outof   & 0xffL));
         return;
         }
 
@@ -355,11 +355,11 @@ register uint32_t *block, *keys;
         work = ((right >> 8) ^ leftt) & 0x00ff00ffL;
         leftt ^= work;
         right ^= (work << 8);
-        right = ((right << 1) | ((right >> 31) & 1L)) & 0xffffffffL;
+        right = (uint32_t) (((right << 1) | ((right >> 31) & 1L)) & 0xffffffffL);
         work = (leftt ^ right) & 0xaaaaaaaaL;
         leftt ^= work;
         right ^= work;
-        leftt = ((leftt << 1) | ((leftt >> 31) & 1L)) & 0xffffffffL;
+        leftt = (uint32_t) (((leftt << 1) | ((leftt >> 31) & 1L)) & 0xffffffffL);
 
         for( round = 0; round < 8; round++ ) {
                 work  = (right << 28) | (right >> 4);

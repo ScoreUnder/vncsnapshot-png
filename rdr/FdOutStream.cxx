@@ -107,7 +107,7 @@ size_t FdOutStream::overrun(size_t itemSize, size_t nItems)
 
   flush();
 
-  if (itemSize * nItems > end - ptr)
+  if (itemSize * nItems > (size_t)(end - ptr))
     nItems = (end - ptr) / itemSize;
 
   return nItems;

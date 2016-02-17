@@ -22,12 +22,14 @@
  */
 
 #ifndef WIN32
+#define _XOPEN_SOURCE 500
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/time.h>
 #include <sys/utsname.h>
 #include <sys/socket.h>
+#include <sys/resource.h>
 
 typedef int SOCKET;
 #else
@@ -35,13 +37,15 @@ typedef int SOCKET;
 #define close(x) closesocket(x)
 #endif
 
+#include <stdint.h>
+
 #include "vncsnapshot.h"
 
 #define FLASHWIDTH 50   /* pixels */
 #define FLASHDELAY 1    /* seconds */
 
 Bool listenSpecified = False;
-int listenPort = 0, flashPort = 0;
+uint16_t listenPort = 0, flashPort = 0;
 
 
 
@@ -55,18 +59,13 @@ int listenPort = 0, flashPort = 0;
 void
 listenForIncomingConnections(int *argc, char **argv, int listenArgIndex)
 {
-  SOCKET listenSocket, flashSocket, sock;
-  fd_set fds;
-  char flashUser[256];
-  int n;
-
   listenSpecified = True;
 
   if (listenArgIndex+1 < *argc && argv[listenArgIndex+1][0] >= '0' &&
                                             argv[listenArgIndex+1][0] <= '9') {
 
-    listenPort = LISTEN_PORT_OFFSET + atoi(argv[listenArgIndex+1]);
-    flashPort = FLASH_PORT_OFFSET + atoi(argv[listenArgIndex+1]);
+    listenPort = (uint16_t) (LISTEN_PORT_OFFSET + atoi(argv[listenArgIndex+1]));
+    flashPort = (uint16_t) (FLASH_PORT_OFFSET + atoi(argv[listenArgIndex+1]));
     removeArgs(argc, argv, listenArgIndex, 2);
 
   } else {
@@ -75,8 +74,8 @@ listenForIncomingConnections(int *argc, char **argv, int listenArgIndex)
       exit(1);
   }
 
-  listenSocket = ListenAtTcpPort(listenPort);
-  flashSocket = ListenAtTcpPort(flashPort);
+  SOCKET listenSocket = ListenAtTcpPort(listenPort);
+  SOCKET flashSocket = ListenAtTcpPort(flashPort);
 
   if ((listenSocket < 0) || (flashSocket < 0)) exit(1);
 
@@ -90,10 +89,11 @@ listenForIncomingConnections(int *argc, char **argv, int listenArgIndex)
 #ifndef WIN32
     /* reap any zombies */
     int status, pid;
-    while ((pid= wait3(&status, WNOHANG, (struct rusage *)0))>0);
+    while ((pid = wait3(&status, WNOHANG, (struct rusage *)0))>0);
 #endif
 
-    FD_ZERO(&fds); 
+    fd_set fds;
+    FD_ZERO(&fds);
 
     FD_SET(flashSocket, &fds);
     FD_SET(listenSocket, &fds);
@@ -102,9 +102,10 @@ listenForIncomingConnections(int *argc, char **argv, int listenArgIndex)
 
     if (FD_ISSET(flashSocket, &fds)) {
 
-      sock = AcceptTcpConnection(flashSocket);
+      SOCKET sock = AcceptTcpConnection(flashSocket);
       if (sock < 0) exit(1);
-      n = recv(sock, flashUser, 255, 0);
+      char flashUser[256];
+      ssize_t n = recv(sock, flashUser, 255, 0);
       if (n > 0) {
         flashUser[n] = 0;
       }

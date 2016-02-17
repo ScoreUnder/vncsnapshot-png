@@ -47,7 +47,7 @@ enum { DEFAULT_BUF_SIZE = 8192,
 
 FdInStream::FdInStream(int fd_, int timeout_, size_t bufSize_)
   : fd(fd_), timeout(timeout_), blockCallback(0), blockCallbackArg(0),
-    timing(false), timeWaitedIn100us(5), timedKbits(0),
+    timeWaitedIn100us(5), timedKbits(0),
     bufSize(bufSize_ ? bufSize_ : DEFAULT_BUF_SIZE), offset(0)
 {
   ptr = end = start = new uint8_t[bufSize];
@@ -57,7 +57,7 @@ FdInStream::FdInStream(int fd_, void (*blockCallback_)(void*),
                        void* blockCallbackArg_, size_t bufSize_)
   : fd(fd_), timeout(0), blockCallback(blockCallback_),
     blockCallbackArg(blockCallbackArg_),
-    timing(false), timeWaitedIn100us(5), timedKbits(0),
+    timeWaitedIn100us(5), timedKbits(0),
     bufSize(bufSize_ ? bufSize_ : DEFAULT_BUF_SIZE), offset(0)
 {
   ptr = end = start = new uint8_t[bufSize];
@@ -117,7 +117,7 @@ size_t FdInStream::overrun(size_t itemSize, size_t nItems)
     end += n;
   }
 
-  if (itemSize * nItems > end - ptr)
+  if (itemSize * nItems > (size_t)(end - ptr))
     nItems = (end - ptr) / itemSize;
 
   return nItems;
@@ -141,108 +141,26 @@ int FdInStream::checkReadable(int fd, int timeout)
   }
 }
 
-#ifdef _WIN32
-static void gettimeofday(struct timeval* tv, void*)
-{
-  LARGE_INTEGER counts, countsPerSec;
-  static double usecPerCount = 0.0;
-
-  if (QueryPerformanceCounter(&counts)) {
-    if (usecPerCount == 0.0) {
-      QueryPerformanceFrequency(&countsPerSec);
-      usecPerCount = 1000000.0 / countsPerSec.QuadPart;
-    }
-
-    LONGLONG usecs = (LONGLONG)(counts.QuadPart * usecPerCount);
-    tv->tv_usec = (long)(usecs % 1000000);
-    tv->tv_sec = (long)(usecs / 1000000);
-
-  } else {
-    struct timeb tb;
-    ftime(&tb);
-    tv->tv_sec = tb.time;
-    tv->tv_usec = tb.millitm * 1000;
-  }
-}
-#endif
-
 size_t FdInStream::readWithTimeoutOrCallback(void* buf, size_t len)
 {
-  struct timeval before, after;
-  if (timing)
-    gettimeofday(&before, 0);
+  int fds_available = checkReadable(fd, timeout);
 
-  size_t n = checkReadable(fd, timeout);
+  if (fds_available < 0) throw SystemException("select",errno);
 
-  if (n < 0) throw SystemException("select",errno);
-
-  if (n == 0) {
+  if (fds_available == 0) {
     if (timeout) throw TimedOut();
     if (blockCallback) (*blockCallback)(blockCallbackArg);
   }
 
+  ssize_t n_read;
   while (true) {
-    n = ::read(fd, buf, len);
-    if (n != -1 || errno != EINTR)
+    n_read = ::read(fd, buf, len);
+    if (n_read != -1 || errno != EINTR)
       break;
     fprintf(stderr,"read returned EINTR\n");
   }
 
-  if (n < 0) throw SystemException("read",errno);
-  if (n == 0) throw EndOfStream();
-
-  if (timing) {
-    gettimeofday(&after, 0);
-//      fprintf(stderr,"%d.%06d\n",(after.tv_sec - before.tv_sec),
-//              (after.tv_usec - before.tv_usec));
-    int newTimeWaited = ((after.tv_sec - before.tv_sec) * 10000 +
-                         (after.tv_usec - before.tv_usec) / 100);
-    int newKbits = n * 8 / 1000;
-
-//      if (newTimeWaited == 0) {
-//        fprintf(stderr,"new kbps infinite t %d k %d\n",
-//                newTimeWaited, newKbits);
-//      } else {
-//        fprintf(stderr,"new kbps %d t %d k %d\n",
-//                newKbits * 10000 / newTimeWaited, newTimeWaited, newKbits);
-//      }
-
-    // limit rate to between 10kbit/s and 40Mbit/s
-
-    if (newTimeWaited > newKbits*1000) newTimeWaited = newKbits*1000;
-    if (newTimeWaited < newKbits/4)    newTimeWaited = newKbits/4;
-
-    timeWaitedIn100us += newTimeWaited;
-    timedKbits += newKbits;
-  }
-
-  return n;
-}
-
-void FdInStream::startTiming()
-{
-  timing = true;
-
-  // Carry over up to 1s worth of previous rate for smoothing.
-
-  if (timeWaitedIn100us > 10000) {
-    timedKbits = timedKbits * 10000 / timeWaitedIn100us;
-    timeWaitedIn100us = 10000;
-  }
-}
-
-void FdInStream::stopTiming()
-{
-  timing = false; 
-  if (timeWaitedIn100us < timedKbits/2)
-    timeWaitedIn100us = timedKbits/2; // upper limit 20Mbit/s
-}
-
-unsigned int FdInStream::kbitsPerSecond()
-{
-  // The following calculation will overflow 32-bit arithmetic if we have
-  // received more than about 50Mbytes (400Mbits) since we started timing, so
-  // it should be OK for a single RFB update.
-
-  return timedKbits * 10000 / timeWaitedIn100us;
+  if (n_read < 0) throw SystemException("read",errno);
+  if (n_read == 0) throw EndOfStream();
+  return n_read;
 }

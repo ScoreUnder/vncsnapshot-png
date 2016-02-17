@@ -16,6 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
 // USA.
 
+#include <assert.h>
+#include <stddef.h>
 #include <stdint.h>
 #include "ZlibOutStream.h"
 #include "Exception.h"
@@ -64,7 +66,9 @@ size_t ZlibOutStream::length()
 void ZlibOutStream::flush()
 {
   zs->next_in = start;
-  zs->avail_in = ptr - start;
+  ptrdiff_t avail_in = ptr - start;
+  zs->avail_in = (uInt) avail_in;
+  assert(zs->avail_in == avail_in);
 
 //    fprintf(stderr,"zos flush: avail_in %d\n",zs->avail_in);
 
@@ -73,7 +77,9 @@ void ZlibOutStream::flush()
     do {
       underlying->check(1);
       zs->next_out = underlying->getptr();
-      zs->avail_out = underlying->getend() - underlying->getptr();
+      ptrdiff_t avail_out = underlying->getend() - underlying->getptr();
+      zs->avail_out = (uInt) avail_out;
+      assert(zs->avail_out == avail_out);
 
 //        fprintf(stderr,"zos flush: calling deflate, avail_in %d, avail_out %d\n",
 //                zs->avail_in,zs->avail_out);
@@ -98,14 +104,18 @@ size_t ZlibOutStream::overrun(size_t itemSize, size_t nItems)
   if (itemSize > bufSize)
     throw Exception("ZlibOutStream overrun: max itemSize exceeded");
 
-  while (end - ptr < itemSize) {
+  while ((size_t)(end - ptr) < itemSize) {
     zs->next_in = start;
-    zs->avail_in = ptr - start;
+    ptrdiff_t avail_in = ptr - start;
+    zs->avail_in = (uInt) avail_in;
+    assert(zs->avail_in == avail_in);
 
     do {
       underlying->check(1);
       zs->next_out = underlying->getptr();
-      zs->avail_out = underlying->getend() - underlying->getptr();
+      ptrdiff_t avail_out = underlying->getend() - underlying->getptr();
+      zs->avail_out = (uInt) avail_out;
+      assert(zs->avail_out == avail_out);
 
 //        fprintf(stderr,"zos overrun: calling deflate, avail_in %d, avail_out %d\n",
 //                zs->avail_in,zs->avail_out);
@@ -134,7 +144,7 @@ size_t ZlibOutStream::overrun(size_t itemSize, size_t nItems)
     }
   }
 
-  if (itemSize * nItems > end - ptr)
+  if (itemSize * nItems > (size_t) (end - ptr))
     nItems = (end - ptr) / itemSize;
 
   return nItems;

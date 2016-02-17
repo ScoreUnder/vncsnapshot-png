@@ -22,6 +22,8 @@
  * RichCursor preudo-encodings).
  */
 
+#include <assert.h>
+
 #include "vncsnapshot.h"
 
 
@@ -29,18 +31,16 @@
 #define OPER_RESTORE  1
 
 #define RGB24_TO_PIXEL(bpp,r,g,b)                                       \
-   ((((CARD##bpp)(r) & 0xFF) * myFormat.redMax + 127) / 255             \
+   ((((uint##bpp##_t)(r) & 0xFF) * myFormat.redMax + 127) / 255             \
     << myFormat.redShift |                                              \
-    (((CARD##bpp)(g) & 0xFF) * myFormat.greenMax + 127) / 255           \
+    (((uint##bpp##_t)(g) & 0xFF) * myFormat.greenMax + 127) / 255           \
     << myFormat.greenShift |                                            \
-    (((CARD##bpp)(b) & 0xFF) * myFormat.blueMax + 127) / 255            \
+    (((uint##bpp##_t)(b) & 0xFF) * myFormat.blueMax + 127) / 255            \
     << myFormat.blueShift)
 
 
 static Bool prevSoftCursorSet = False;
-/*static Pixmap rcSavedArea;*/
-static char *rcSavedArea;
-static CARD8 *rcSource, *rcMask;
+static uint8_t *rcSavedArea, *rcSource, *rcMask;
 static int rcHotX, rcHotY, rcWidth, rcHeight;
 static int rcCursorX = 0, rcCursorY = 0;
 static int rcLockX, rcLockY, rcLockWidth, rcLockHeight;
@@ -58,20 +58,20 @@ static void FreeSoftCursor(void);
  * why we call it "software cursor").
  ********************************************************************/
 
-Bool HandleCursorShape(int xhot, int yhot, int width, int height, CARD32 enc)
+Bool HandleCursorShape(int xhot, int yhot, int width, int height, uint32_t enc)
 {
   int bytesPerPixel;
   size_t bytesPerRow, bytesMaskData;
 /*  Drawable dr;*/
   rfbXCursorColors rgb;
-  CARD32 colors[2];
-  char *buf;
-  CARD8 *ptr;
-  int x, y, b;
+
+  assert(width >= 0);
+  assert(height >= 0);
+  assert(SIZE_MAX / (size_t) width >= (size_t) height);  /* Overflow check for safety since we malloc this */
 
   bytesPerPixel = myFormat.bitsPerPixel / 8;
-  bytesPerRow = (width + 7) / 8;
-  bytesMaskData = bytesPerRow * height;
+  bytesPerRow = (size_t) ((width + 7) / 8);
+  bytesMaskData = bytesPerRow * (size_t) height;
 /*  dr = DefaultRootWindow(dpy);*/
 
   FreeSoftCursor();
@@ -81,11 +81,11 @@ Bool HandleCursorShape(int xhot, int yhot, int width, int height, CARD32 enc)
 
   /* Allocate memory for pixel data and temporary mask data. */
 
-  rcSource = malloc(width * height * bytesPerPixel);
+  rcSource = malloc((size_t) (width * height * bytesPerPixel));
   if (rcSource == NULL)
     return False;
 
-  buf = malloc(bytesMaskData);
+  uint8_t *buf = malloc(bytesMaskData);
   if (buf == NULL) {
     free(rcSource);
     return False;
@@ -96,13 +96,15 @@ Bool HandleCursorShape(int xhot, int yhot, int width, int height, CARD32 enc)
   if (enc == rfbEncodingXCursor) {
 
     /* Read and convert background and foreground colors. */
-    if (!ReadFromRFBServer((char *)&rgb, sz_rfbXCursorColors)) {
+    if (!ReadFromRFBServer((uint8_t *)&rgb, sz_rfbXCursorColors)) {
       free(rcSource);
       free(buf);
       return False;
     }
-    colors[0] = RGB24_TO_PIXEL(32, rgb.backRed, rgb.backGreen, rgb.backBlue);
-    colors[1] = RGB24_TO_PIXEL(32, rgb.foreRed, rgb.foreGreen, rgb.foreBlue);
+    uint32_t colors[2] = {
+      RGB24_TO_PIXEL(32, rgb.backRed, rgb.backGreen, rgb.backBlue),
+      RGB24_TO_PIXEL(32, rgb.foreRed, rgb.foreGreen, rgb.foreBlue),
+    };
 
     /* Read 1bpp pixel data into a temporary buffer. */
     if (!ReadFromRFBServer(buf, bytesMaskData)) {
@@ -112,15 +114,16 @@ Bool HandleCursorShape(int xhot, int yhot, int width, int height, CARD32 enc)
     }
 
     /* Convert 1bpp data to byte-wide color indices. */
-    ptr = rcSource;
-    for (y = 0; y < height; y++) {
-      for (x = 0; x < width / 8; x++) {
-        for (b = 7; b >= 0; b--) {
+    uint8_t *ptr = rcSource;
+    for (size_t y = 0; y < (size_t) height; y++) {
+      size_t x;
+      for (x = 0; x < (size_t) width / 8; x++) {
+        for (int b = 7; b >= 0; b--) {
           *ptr = buf[y * bytesPerRow + x] >> b & 1;
           ptr += bytesPerPixel;
         }
       }
-      for (b = 7; b > 7 - width % 8; b--) {
+      for (int b = 7; b > 7 - width % 8; b--) {
         *ptr = buf[y * bytesPerRow + x] >> b & 1;
         ptr += bytesPerPixel;
       }
@@ -129,22 +132,22 @@ Bool HandleCursorShape(int xhot, int yhot, int width, int height, CARD32 enc)
     /* Convert indices into the actual pixel values. */
     switch (bytesPerPixel) {
     case 1:
-      for (x = 0; x < width * height; x++)
-        rcSource[x] = (CARD8)colors[rcSource[x]];
+      for (size_t x = 0; x < (size_t)(width * height); x++)
+        rcSource[x] = (uint8_t) colors[rcSource[x]];
       break;
     case 2:
-      for (x = 0; x < width * height; x++)
-        ((CARD16 *)rcSource)[x] = (CARD16)colors[rcSource[x * 2]];
+      for (size_t x = 0; x < (size_t)(width * height); x++)
+        ((uint16_t *)rcSource)[x] = (uint16_t) colors[rcSource[x * 2]];
       break;
     case 4:
-      for (x = 0; x < width * height; x++)
-        ((CARD32 *)rcSource)[x] = colors[rcSource[x * 4]];
+      for (size_t x = 0; x < (size_t)(width * height); x++)
+        ((uint32_t *)rcSource)[x] = colors[rcSource[x * 4]];
       break;
     }
 
   } else {                      /* enc == rfbEncodingRichCursor */
 
-    if (!ReadFromRFBServer((char *)rcSource, width * height * bytesPerPixel)) {
+    if (!ReadFromRFBServer((uint8_t *)rcSource, (size_t)(width * height * bytesPerPixel))) {
       free(rcSource);
       free(buf);
       return False;
@@ -160,21 +163,23 @@ Bool HandleCursorShape(int xhot, int yhot, int width, int height, CARD32 enc)
     return False;
   }
 
-  rcMask = malloc(width * height);
+  // Overflow checked earlier in the function
+  rcMask = malloc((size_t)(width * height));
   if (rcMask == NULL) {
     free(rcSource);
     free(buf);
     return False;
   }
 
-  ptr = rcMask;
-  for (y = 0; y < height; y++) {
-    for (x = 0; x < width / 8; x++) {
-      for (b = 7; b >= 0; b--) {
+  uint8_t *ptr = rcMask;
+  for (size_t y = 0; y < (size_t)height; y++) {
+    size_t x;
+    for (x = 0; x < (size_t)width / 8; x++) {
+      for (int b = 7; b >= 0; b--) {
         *ptr++ = buf[y * bytesPerRow + x] >> b & 1;
       }
     }
-    for (b = 7; b > 7 - width % 8; b--) {
+    for (int b = 7; b > 7 - width % 8; b--) {
       *ptr++ = buf[y * bytesPerRow + x] >> b & 1;
     }
   }
@@ -322,15 +327,13 @@ static Bool SoftCursorInLockedArea(void)
 
 static void SoftCursorCopyArea(int oper)
 {
-  int x, y, w, h;
-
-  x = rcCursorX - rcHotX;
-  y = rcCursorY - rcHotY;
+  int32_t x = rcCursorX - rcHotX;
+  int32_t y = rcCursorY - rcHotY;
   if (x >= si.framebufferWidth || y >= si.framebufferHeight)
     return;
 
-  w = rcWidth;
-  h = rcHeight;
+  int32_t w = rcWidth;
+  int32_t h = rcHeight;
   if (x < 0) {
     w += x;
     x = 0;
@@ -350,32 +353,31 @@ static void SoftCursorCopyArea(int oper)
         free(rcSavedArea);
         rcSavedArea = NULL;
     }
-    rcSavedArea = CopyScreenToData(x, y, w, h);
+    rcSavedArea = CopyScreenToData((uint32_t)x, (uint32_t)y, (uint32_t)w, (uint32_t)h);
   } else {
     /* Restore screen area. */
-    CopyDataToScreen(rcSavedArea, x, y, w, h);
+    CopyDataToScreen(rcSavedArea, (uint32_t)x, (uint32_t)y, (uint32_t)w, (uint32_t)h);
   }
 }
 
 static void SoftCursorDraw(void)
 {
-  int x, y, x0, y0;
-  int offset, bytesPerPixel;
-  char *pos;
+  uint_fast8_t bytesPerPixel;
+  uint8_t *pos;
 
   bytesPerPixel = myFormat.bitsPerPixel / 8;
 
   /* FIXME: Speed optimization is possible. */
-  for (y = 0; y < rcHeight; y++) {
-    y0 = rcCursorY - rcHotY + y;
+  for (int32_t y = 0; y < rcHeight; y++) {
+    int32_t y0 = rcCursorY - rcHotY + y;
     if (y0 >= 0 && y0 < si.framebufferHeight) {
-      for (x = 0; x < rcWidth; x++) {
-        x0 = rcCursorX - rcHotX + x;
+      for (int32_t x = 0; x < rcWidth; x++) {
+        int32_t x0 = rcCursorX - rcHotX + x;
         if (x0 >= 0 && x0 < si.framebufferWidth) {
-          offset = y * rcWidth + x;
+          size_t offset = (size_t)(y * rcWidth + x);
           if (rcMask[offset]) {
-            pos = (char *)&rcSource[offset * bytesPerPixel];
-            CopyDataToScreen(pos, x0, y0, 1, 1);
+            pos = &rcSource[offset * bytesPerPixel];
+            CopyDataToScreen(pos, (uint32_t)x0, (uint32_t)y0, 1, 1);
           }
         }
       }

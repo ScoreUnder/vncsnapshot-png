@@ -49,7 +49,7 @@ extern "C" {
 #include "rdr/FdOutStream.h"
 #include "rdr/Exception.h"
 
-extern "C" { void PrintInHex(char *buf, int len); }
+extern "C" { void PrintInHex(char *buf, size_t len); }
 
 
 int rfbsock;
@@ -105,7 +105,7 @@ InitializeSockets(void)
  * ConnectToRFBServer.
  */
 
-Bool ConnectToRFBServer(const char *hostname, int port)
+Bool ConnectToRFBServer(const char *hostname, uint16_t port)
 {
   int sock = ConnectToTcpAddr(hostname, port);
 
@@ -139,7 +139,7 @@ Bool SetRFBSock(int sock)
   return False;
 }
 
-Bool ReadFromRFBServer(char *out, unsigned int n)
+Bool ReadFromRFBServer(uint8_t *out, size_t n)
 {
   try {
     fis->readBytes(out, n);
@@ -155,7 +155,7 @@ Bool ReadFromRFBServer(char *out, unsigned int n)
  * Write an exact number of bytes, and don't return until you've sent them.
  */
 
-Bool WriteToRFBServer(char *buf, int n)
+Bool WriteToRFBServer(uint8_t *buf, size_t n)
 {
   try {
     fos->writeBytes(buf, n);
@@ -172,7 +172,7 @@ Bool WriteToRFBServer(char *buf, int n)
  * ConnectToTcpAddr connects to the given host and port.
  */
 
-int ConnectToTcpAddr(const char* hostname, int port)
+int ConnectToTcpAddr(const char* hostname, uint16_t port)
 {
   int sock;
   struct sockaddr_in addr;
@@ -221,10 +221,11 @@ int ConnectToTcpAddr(const char* hostname, int port)
  * (TUNNEL_PORT_OFFSET, TUNNEL_PORT_OFFSET + 99]. Returns 0 on failure.
  */
 
-int
+uint16_t
 FindFreeTcpPort(void)
 {
-  int sock, port;
+  int sock;
+  uint16_t port;
   struct sockaddr_in addr;
 
   addr.sin_family = AF_INET;
@@ -254,7 +255,7 @@ FindFreeTcpPort(void)
  * ListenAtTcpPort starts listening at the given TCP port.
  */
 
-int ListenAtTcpPort(int port)
+int ListenAtTcpPort(uint16_t port)
 {
   int sock;
   struct sockaddr_in addr;
@@ -361,9 +362,9 @@ Bool StringToIPAddr(const char *str, unsigned int *addr)
  * Print out the contents of a packet for debugging.
  */
 
-void PrintInHex(char *buf, int len)
+void PrintInHex(char *buf, size_t len)
 {
-  int i, j;
+  size_t i, j;
   char c, str[17];
 
   str[16] = 0;

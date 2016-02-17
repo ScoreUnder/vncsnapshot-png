@@ -28,23 +28,22 @@
  */
 
 #define HandleCoRREBPP CONCAT2E(HandleCoRRE,BPP)
+#ifndef CARDBPP
+// XXX CARDBPP is defined elsewhere
 #define CARDBPP CONCAT2E(CARD,BPP)
+#endif
 
 static Bool
-HandleCoRREBPP (int rx, int ry, int rw, int rh)
+HandleCoRREBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
 {
     rfbRREHeader hdr;
-    unsigned int i;
-    CARDBPP pix;
-    CARD8 *ptr;
-    int x, y, w, h;
-
-    if (!ReadFromRFBServer((char *)&hdr, sz_rfbRREHeader))
+    if (!ReadFromRFBServer((uint8_t *)&hdr, sz_rfbRREHeader))
         return False;
 
     hdr.nSubrects = Swap32IfLE(hdr.nSubrects);
 
-    if (!ReadFromRFBServer((char *)&pix, sizeof(pix)))
+    CARDBPP pix;
+    if (!ReadFromRFBServer((uint8_t *)&pix, sizeof(pix)))
         return False;
 
     FillBufferRectangle(rx, ry, rw, rh, pix);
@@ -52,15 +51,15 @@ HandleCoRREBPP (int rx, int ry, int rw, int rh)
     if (!ReadFromRFBServer(buffer, hdr.nSubrects * (4 + (BPP / 8))))
         return False;
 
-    ptr = (CARD8 *)buffer;
+    uint8_t *ptr = buffer;
 
-    for (i = 0; i < hdr.nSubrects; i++) {
+    for (uint32_t i = 0; i < hdr.nSubrects; i++) {
         pix = *(CARDBPP *)ptr;
         ptr += BPP/8;
-        x = *ptr++;
-        y = *ptr++;
-        w = *ptr++;
-        h = *ptr++;
+        uint32_t x = *ptr++;
+        uint32_t y = *ptr++;
+        uint32_t w = *ptr++;
+        uint32_t h = *ptr++;
 
         FillBufferRectangle(rx + x, ry + y, w, h, pix);
     }

@@ -59,7 +59,7 @@ Options cmdLineOptions[] = {
   {"-vncQuality",    setNumber, &appData.qualityLevel, 0, " <JPEG-QUALITY-VALUE>: transmission quality level (0..9: 0-low, 9-high)"},
   {"-fps",           setNumber, &appData.fps, 0, " <FPS>: Wait <FPS> seconds between snapshots, default 60"},
   {"-count",         setNumber, &appData.count, 0, " <COUNT>: Capture <COUNT> images, default 1"},
-  {NULL, NULL, NULL, 0}
+  {NULL, NULL, NULL, 0, NULL}
 };
 
 
@@ -70,7 +70,7 @@ Options cmdLineOptions[] = {
  */
 
 char vncServerHost[256];
-int vncServerPort = 0;
+uint16_t vncServerPort = 0;
 char *vncServerName;
 
 
@@ -170,7 +170,8 @@ GetArgsAndResources(int argc, char **argv)
   char **arg;
   int processed;
   char *vncServerName, *colonPos;
-  int len, portOffset;
+  size_t len;
+  uint16_t portOffset;
 
 
   argsleft = argc;
@@ -197,18 +198,18 @@ GetArgsAndResources(int argc, char **argv)
         /* We could use sscanf, but the return value is not consistent
          * across all platforms.
          */
-        int32_t w, h;
-        int32_t x, y;
+        uint32_t w, h;
+        uint32_t x, y;
         char *end = NULL;
 
-        w = strtol(rect, &end, 10);
+        w = (uint32_t) strtoul(rect, &end, 10);
         if (end == NULL || end == rect || *end != 'x') {
             fprintf(stderr, "%s: invalid rectangle specification %s\n",
                     programName, rect);
             usage();
         }
         end++;
-        h = strtol(end, &end, 10);
+        h = (uint32_t) strtoul(end, &end, 10);
         if (end == NULL || end == rect || (*end != '+' && *end != '-')) {
             fprintf(stderr, "%s: invalid rectangle specification %s\n",
                     programName, rect);
@@ -217,7 +218,7 @@ GetArgsAndResources(int argc, char **argv)
         /* determine sign */
         appData.rectXNegative = *end == '-';
         end++;
-        x = strtol(end, &end, 10);
+        x = (uint32_t) strtoul(end, &end, 10);
         if (end == NULL || end == rect || (*end != '+' && *end != '-')) {
             fprintf(stderr, "%s: invalid rectangle specification %s\n",
                     programName, rect);
@@ -226,7 +227,7 @@ GetArgsAndResources(int argc, char **argv)
         /* determine sign */
         appData.rectYNegative = *end == '-';
         end++;
-        y = strtol(end, &end, 10);
+        y = (uint32_t) strtoul(end, &end, 10);
         if (end == NULL || end == rect || *end != '\0') {
             fprintf(stderr, "%s: invalid rectangle specification %s\n",
                     programName, rect);
@@ -235,8 +236,8 @@ GetArgsAndResources(int argc, char **argv)
 
         appData.rectWidth = w;
         appData.rectHeight = h;
-        appData.rectX = x;
-        appData.rectY = y;
+        appData.rectX = (int32_t) x;
+        appData.rectY = (int32_t) y;
     }
 
     argc = argsleft;
@@ -279,7 +280,7 @@ GetArgsAndResources(int argc, char **argv)
     strcpy(vncServerHost, vncServerName);
     vncServerPort = SERVER_PORT_OFFSET;
   } else {
-    memcpy(vncServerHost, vncServerName, colonPos - vncServerName);
+    memcpy(vncServerHost, vncServerName, (size_t) (colonPos - vncServerName));
     vncServerHost[colonPos - vncServerName] = '\0';
     len = strlen(colonPos + 1);
     portOffset = SERVER_PORT_OFFSET;
@@ -292,25 +293,22 @@ GetArgsAndResources(int argc, char **argv)
     if (!len || strspn(colonPos + 1, "0123456789") != len) {
       usage();
     }
-    vncServerPort = atoi(colonPos + 1) + portOffset;
+    vncServerPort = (uint16_t) (atoi(colonPos + 1) + portOffset);
   }
 }
 
 static int setNumber(int *argc, char ***argv, void *arg, int value)
 {
-    long number;
-    char *end;
-    int ok;
-
-    ok = 0;
+    (void) value;
+    int ok = 0;
     if (*argc > 2) {
         (*argc) --;
         (*argv)++;
-        end = NULL;
+        char *end = NULL;
 
-        number = strtol((*argv)[0], &end, 0);
+        long number = strtol((*argv)[0], &end, 0);
         if (end != NULL && *end == '\0') {
-            *((int *) arg) = number;
+            *((int *) arg) = (int) number;
             ok = 1;
         }
     }
@@ -320,11 +318,10 @@ static int setNumber(int *argc, char ***argv, void *arg, int value)
 
 static int setString(int *argc, char ***argv, void *arg, int value)
 {
-    int ok;
-
-    ok = 0;
+    (void) value;
+    int ok = 0;
     if (*argc > 2) {
-        (*argc) --;
+        (*argc)--;
         (*argv)++;
         *((char **) arg) = (*argv)[0];
         ok = 1;
@@ -334,6 +331,7 @@ static int setString(int *argc, char ***argv, void *arg, int value)
 
 static int setFlag(int *argc, char ***argv, void *arg, int value)
 {
-    *((Bool *)arg) = value;
+    (void) argc, (void) argv;
+    *((Bool *)arg) = (Bool) value;
     return 1;
 }

@@ -27,16 +27,21 @@
  * encoded rectangle with BPP bits per pixel.
  */
 
+#include <assert.h>
+
 #define HandleZlibBPP CONCAT2E(HandleZlib,BPP)
-#define CARDBPP CONCAT2E(CARD,BPP)
+#ifndef CARDBPP
+// XXX CARDBPP redefined
+#define CARDBPP CONCAT2E(CONCAT2E(uint,BPP),_t)
+#endif
 
 static Bool
-HandleZlibBPP (int rx, int ry, int rw, int rh)
+HandleZlibBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
 {
   rfbZlibHeader hdr;
-  int remaining;
+  size_t remaining;
   int inflateResult;
-  int toRead;
+  size_t toRead;
 
   /* First make sure we have a large enough raw buffer to hold the
    * decompressed data.  In practice, with a fixed BPP, fixed frame
@@ -44,7 +49,8 @@ HandleZlibBPP (int rx, int ry, int rw, int rh)
    * buffer, this buffer allocation should only happen once, on the
    * first update.
    */
-  if ( raw_buffer_size < (( rw * rh ) * ( BPP / 8 ))) {
+  size_t requested_size = (size_t)(( rw * rh ) * ( BPP / 8 ));
+  if ( raw_buffer_size < requested_size) {
 
     if ( raw_buffer != NULL ) {
 
@@ -52,12 +58,12 @@ HandleZlibBPP (int rx, int ry, int rw, int rh)
 
     }
 
-    raw_buffer_size = (( rw * rh ) * ( BPP / 8 ));
-    raw_buffer = (char*) malloc( raw_buffer_size );
+    raw_buffer_size = requested_size;
+    raw_buffer = (uint8_t*) malloc( raw_buffer_size );
 
   }
 
-  if (!ReadFromRFBServer((char *)&hdr, sz_rfbZlibHeader))
+  if (!ReadFromRFBServer((uint8_t *)&hdr, sz_rfbZlibHeader))
     return False;
 
   remaining = Swap32IfLE(hdr.nBytes);
@@ -66,7 +72,8 @@ HandleZlibBPP (int rx, int ry, int rw, int rh)
   decompStream.next_in   = ( Bytef * )buffer;
   decompStream.avail_in  = 0;
   decompStream.next_out  = ( Bytef * )raw_buffer;
-  decompStream.avail_out = raw_buffer_size;
+  decompStream.avail_out = (uInt) raw_buffer_size;
+  assert(decompStream.avail_out == raw_buffer_size);
   decompStream.data_type = Z_BINARY;
 
   /* Initialize the decompression stream structures on the first invocation. */
@@ -106,7 +113,8 @@ HandleZlibBPP (int rx, int ry, int rw, int rh)
       return False;
 
     decompStream.next_in  = ( Bytef * )buffer;
-    decompStream.avail_in = toRead;
+    decompStream.avail_in = (uInt) toRead;
+    assert(decompStream.avail_in == toRead);
 
     /* Need to uncompress buffer full. */
     inflateResult = inflate( &decompStream, Z_SYNC_FLUSH );
@@ -135,7 +143,7 @@ HandleZlibBPP (int rx, int ry, int rw, int rh)
 
     remaining -= toRead;
 
-  } /* while ( remaining > 0 ) */
+  }
 
   if ( inflateResult == Z_OK ) {
 

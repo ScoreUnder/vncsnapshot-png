@@ -21,6 +21,8 @@
  * vncsnapshot.c - the VNC snapshot.
  */
 
+#include <stdint.h>
+#include <inttypes.h>
 #include <time.h>
 #include <ctype.h>
 
@@ -149,7 +151,7 @@ main(int argc, char **argv)
           }
       }
       if (cp != NULL) {
-          strncpy(filename, appData.outputFilename, cp - appData.outputFilename);
+          strncpy(filename, appData.outputFilename, (size_t)(cp - appData.outputFilename));
           append = filename + (cp - appData.outputFilename);
           suffix = cp;
       } else {
@@ -176,20 +178,20 @@ main(int argc, char **argv)
     if (appData.rectX < 0) {
       appData.rectX = si.framebufferWidth + appData.rectX;
     } else if (appData.rectXNegative) {
-      appData.rectX = si.framebufferWidth - appData.rectX - appData.rectWidth;
+      appData.rectX = si.framebufferWidth - appData.rectX - (int32_t)appData.rectWidth;
     }
     if (appData.rectY < 0) {
       appData.rectY = si.framebufferHeight + appData.rectY;
     } else if (appData.rectYNegative) {
-      appData.rectY = si.framebufferHeight - appData.rectY - appData.rectHeight;
+      appData.rectY = si.framebufferHeight - appData.rectY - (int32_t)appData.rectHeight;
     }
     if (appData.rectX >= si.framebufferWidth || appData.rectX < 0) {
-      fprintf(stderr, "%s: Requested rectangle x <%ld> is outside screen width <%d>, using 0\n",
+      fprintf(stderr, "%s: Requested rectangle x <%" PRId32 "> is outside screen width <%" PRId16 ">, using 0\n",
               programName, appData.rectX, si.framebufferWidth);
       appData.rectX = 0;
     }
     if (appData.rectY >= si.framebufferHeight || appData.rectY < 0) {
-      fprintf(stderr, "%s: Requested rectangle y <%ld> is outside screen height <%d>, using 0\n",
+      fprintf(stderr, "%s: Requested rectangle y <%" PRId32 "> is outside screen height <%" PRId16 ">, using 0\n",
               programName, appData.rectY, si.framebufferHeight);
       appData.rectY = 0;
     }
@@ -198,23 +200,23 @@ main(int argc, char **argv)
      * Width/height of 0 means to edge.
      */
     if (appData.rectWidth == 0) {
-      appData.rectWidth = si.framebufferWidth - appData.rectX;
+      appData.rectWidth = si.framebufferWidth - (uint32_t)appData.rectX;
     }
     if (appData.rectHeight == 0) {
-      appData.rectHeight = si.framebufferHeight - appData.rectY;
+      appData.rectHeight = si.framebufferHeight - (uint32_t)appData.rectY;
     }
-    if (appData.rectWidth <= 0 || appData.rectWidth > si.framebufferWidth - appData.rectX) {
-      fprintf(stderr, "%s: Requested rectangle width <%ld> plus offset <%ld> is wider than screen width <%d>, using %ld\n",
-              programName, appData.rectWidth, appData.rectX, si.framebufferWidth, si.framebufferWidth - appData.rectX);
-      appData.rectWidth = si.framebufferWidth - appData.rectX;
+    if (appData.rectWidth <= 0 || (int32_t)appData.rectWidth > (int32_t)si.framebufferWidth - appData.rectX) {
+      fprintf(stderr, "%s: Requested rectangle width <%" PRId32 "> plus offset <%" PRId32 "> is wider than screen width <%" PRId16 ">, using %" PRId32 "\n",
+              programName, appData.rectWidth, appData.rectX, si.framebufferWidth, (int32_t)(si.framebufferWidth - appData.rectX));
+      appData.rectWidth = si.framebufferWidth - (uint32_t)appData.rectX;
     }
-    if (appData.rectHeight <= 0 || appData.rectHeight > si.framebufferHeight - appData.rectY) {
-      fprintf(stderr, "%s: Requested rectangle height <%ld> plus offset <%ld> is wider than screen height <%d>, using %ld\n",
+    if (appData.rectHeight <= 0 || (int32_t)appData.rectHeight > (int32_t)si.framebufferHeight - appData.rectY) {
+      fprintf(stderr, "%s: Requested rectangle height <%" PRId32 "> plus offset <%" PRId32 "> is wider than screen height <%" PRId16 ">, using %" PRId32 "\n",
               programName, appData.rectHeight, appData.rectY, si.framebufferHeight, si.framebufferHeight - appData.rectY);
-      appData.rectHeight = si.framebufferHeight - appData.rectY;
+      appData.rectHeight = si.framebufferHeight - (uint32_t)appData.rectY;
     }
-    if (!SendFramebufferUpdateRequest(appData.rectX, appData.rectY, appData.rectWidth,
-                                      appData.rectHeight, False)) {
+    if (!SendFramebufferUpdateRequest((uint16_t)appData.rectX, (uint16_t)appData.rectY, (uint16_t)appData.rectWidth,
+                                      (uint16_t)appData.rectHeight, False)) {
       exit(1);
     }
 
@@ -224,18 +226,17 @@ main(int argc, char **argv)
     }
 
     /* shrink buffer to requested rectangle */
-    ShrinkBuffer(appData.rectX, appData.rectY, appData.rectWidth, appData.rectHeight);
-    //write_JPEG_file(filename, appData.saveQuality, appData.rectWidth, appData.rectHeight);
+    ShrinkBuffer((uint32_t)appData.rectX, (uint32_t)appData.rectY, appData.rectWidth, appData.rectHeight);
     write_PNG(filename, 0 /* don't interlace */, appData.rectWidth, appData.rectHeight);
     if (!appData.quiet) {
-      fprintf(stderr, "Image saved from %s %dx%d screen to ", vncServerName ? vncServerName : "(local host)",
+      fprintf(stderr, "Image saved from %s %" PRId16 "x%" PRId16 " screen to ", vncServerName ? vncServerName : "(local host)",
               si.framebufferWidth, si.framebufferHeight);
       if (strcmp(filename, "-") == 0) {
         fprintf(stderr, "- (stdout)");
       } else {
         fprintf(stderr, "%s", filename);
       }
-      fprintf(stderr, " using %ldx%ld+%ld+%ld rectangle\n", appData.rectWidth, appData.rectHeight,
+      fprintf(stderr, " using %" PRId32 "x%" PRId32 "+%" PRId32 "+%" PRId32 " rectangle\n", appData.rectWidth, appData.rectHeight,
               appData.rectX, appData.rectY);
       if (appData.useRemoteCursor != -1 && !appData.gotCursorPos) {
         if (appData.useRemoteCursor) {
@@ -253,7 +254,7 @@ main(int argc, char **argv)
          */
         time_t now = time(NULL);
         if (now < last_time + appData.fps) {
-            sleep(last_time + appData.fps - now);
+            sleep((unsigned int)(last_time + appData.fps - now));
         }
         last_time = now;
         /* Request update - incremental is fine here. */

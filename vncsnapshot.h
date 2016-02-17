@@ -33,24 +33,6 @@
 
 #include "rfb.h"
 
-extern int endianTest;
-
-#ifdef Swap16IfLE
-#undef Swap16IfLE
-#endif
-#ifdef Swap32IfLE
-#undef Swap32IfLE
-#endif
-
-#define Swap16IfLE(s) \
-    (*(char *)&endianTest ? ((((s) & 0xff) << 8) | (((s) >> 8) & 0xff)) : (s))
-
-#define Swap32IfLE(l) \
-    (*(char *)&endianTest ? ((((l) & 0xff000000) >> 24) | \
-                             (((l) & 0x00ff0000) >> 8)  | \
-                             (((l) & 0x0000ff00) << 8)  | \
-                             (((l) & 0x000000ff) << 24))  : (l))
-
 #define MAX_ENCODINGS 20
 
 #define FLASH_PORT_OFFSET 5400
@@ -91,8 +73,8 @@ typedef struct {
   Bool debug;
 
 
-  int compressLevel;
-  int qualityLevel;
+  int32_t compressLevel;
+  int32_t qualityLevel;
   Bool useRemoteCursor;
   Bool ignoreBlank; /* ignore blank screens */
   Bool enableJPEG;
@@ -104,8 +86,8 @@ typedef struct {
 
   char rectXNegative; /* if non-zero, X or Y relative to opposite edge */
   char rectYNegative;
-  int32_t rectWidth;
-  int32_t rectHeight;
+  uint32_t rectWidth;
+  uint32_t rectHeight;
   int32_t rectX;
   int32_t rectY;
   char gotCursorPos;
@@ -118,9 +100,9 @@ extern AppData appData;
 extern char *fallback_resources[];
 extern char vncServerHost[];
 extern char *vncServerName;
-extern int vncServerPort;
+extern uint16_t vncServerPort;
 extern Bool listenSpecified;
-extern int listenPort, flashPort;
+extern uint16_t listenPort, flashPort;
 
 
 extern void removeArgs(int *argc, char** argv, int idx, int nargs);
@@ -129,12 +111,11 @@ extern void GetArgsAndResources(int argc, char **argv);
 
 /* buffer.c */
 extern int AllocateBuffer();
-extern void CopyDataToScreen(char *buffer, int32_t x, int32_t y, int32_t w, int32_t h);
-extern char *CopyScreenToData(int32_t x, int32_t y, int32_t w, int32_t h);
-extern void FillBufferRectangle(int32_t x, int32_t y, int32_t w, int32_t h, uint32_t pixel);
-extern void ShrinkBuffer(int32_t x, int32_t y, int32_t req_width, int32_t req_height);
-extern void write_JPEG_file (char * filename, int quality, int width, int height);
-extern void write_PNG (char * filename, int quality, int width, int height);
+extern void CopyDataToScreen(uint8_t *buffer, uint32_t x, uint32_t y, uint32_t w, uint32_t h);
+extern uint8_t *CopyScreenToData(uint32_t x, uint32_t y, uint32_t w, uint32_t h);
+extern void FillBufferRectangle(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t pixel);
+extern void ShrinkBuffer(uint32_t x, uint32_t y, uint32_t req_width, uint32_t req_height);
+extern void write_PNG (char * filename, int quality, uint32_t width, uint32_t height);
 extern int BufferIsBlank();
 extern int BufferWritten();
 
@@ -145,7 +126,7 @@ extern uint32_t BGR233ToPixel[];
 
 /* cursor.c */
 
-extern Bool HandleCursorShape(int xhot, int yhot, int width, int height, CARD32 enc);
+extern Bool HandleCursorShape(int xhot, int yhot, int width, int height, uint32_t enc);
 extern Bool HandleCursorPos(int x, int y);
 extern void SoftCursorLockArea(int x, int y, int w, int h);
 extern void SoftCursorUnlockScreen(void);
@@ -162,18 +143,18 @@ extern Bool canUseHextile;
 extern char *desktopName;
 extern rfbPixelFormat myFormat;
 extern rfbServerInitMsg si;
-extern char *serverCutText;
+extern uint8_t *serverCutText;
 extern Bool newServerCutText;
 
-extern Bool ConnectToRFBServer(const char *hostname, int port);
+extern Bool ConnectToRFBServer(const char *hostname, uint16_t port);
 extern Bool InitialiseRFBConnection();
 extern Bool SendSetPixelFormat();
 extern Bool SendSetEncodings();
 extern Bool SendIncrementalFramebufferUpdateRequest();
-extern Bool SendFramebufferUpdateRequest(int x, int y, int w, int h,
+extern Bool SendFramebufferUpdateRequest(uint16_t x, uint16_t y, uint16_t w, uint16_t h,
                                          Bool incremental);
 extern Bool SendPointerEvent(int x, int y, int buttonMask);
-extern Bool SendKeyEvent(CARD32 key, Bool down);
+extern Bool SendKeyEvent(uint32_t key, Bool down);
 extern Bool SendClientCutText(char *str, int len);
 extern Bool HandleRFBServerMessage();
 
@@ -185,17 +166,17 @@ extern Bool sameMachine;
 extern int rfbsock;
 
 extern Bool InitializeSockets(void);
-extern Bool ConnectToRFBServer(const char *hostname, int port);
+extern Bool ConnectToRFBServer(const char *hostname, uint16_t port);
 extern Bool SetRFBSock(int sock);
 extern void StartTiming();
 extern void StopTiming();
 extern int KbitsPerSecond();
 extern int TimeWaitedIn100us();
-extern Bool ReadFromRFBServer(char *out, unsigned int n);
-extern Bool WriteToRFBServer(char *buf, int n);
-extern int ConnectToTcpAddr(const char* hostname, int port);
-extern int FindFreeTcpPort();
-extern int ListenAtTcpPort(int port);
+extern Bool ReadFromRFBServer(uint8_t *out, size_t n);
+extern Bool WriteToRFBServer(uint8_t *buf, size_t n);
+extern int ConnectToTcpAddr(const char* hostname, uint16_t port);
+extern uint16_t FindFreeTcpPort();
+extern int ListenAtTcpPort(uint16_t port);
 extern int AcceptTcpConnection(int listenSock);
 
 extern Bool StringToIPAddr(const char *str, unsigned int *addr);

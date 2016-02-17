@@ -28,31 +28,30 @@
  */
 
 #define HandleRREBPP CONCAT2E(HandleRRE,BPP)
-#define CARDBPP CONCAT2E(CARD,BPP)
+#define CARDBPP CONCAT2E(CONCAT2E(uint,BPP),_t)
 
 static Bool
-HandleRREBPP (int rx, int ry, int rw, int rh)
+HandleRREBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
 {
   rfbRREHeader hdr;
-  unsigned int i;
   CARDBPP pix;
   rfbRectangle subrect;
 
-  if (!ReadFromRFBServer((char *)&hdr, sz_rfbRREHeader))
+  if (!ReadFromRFBServer((uint8_t *)&hdr, sz_rfbRREHeader))
     return False;
 
   hdr.nSubrects = Swap32IfLE(hdr.nSubrects);
 
-  if (!ReadFromRFBServer((char *)&pix, sizeof(pix)))
+  if (!ReadFromRFBServer((uint8_t *)&pix, sizeof(pix)))
     return False;
 
   FillBufferRectangle(rx, ry, rw, rh, pix);
 
-  for (i = 0; i < hdr.nSubrects; i++) {
-    if (!ReadFromRFBServer((char *)&pix, sizeof(pix)))
+  for (uint32_t i = 0; i < hdr.nSubrects; i++) {
+    if (!ReadFromRFBServer((uint8_t *)&pix, sizeof(pix)))
       return False;
 
-    if (!ReadFromRFBServer((char *)&subrect, sz_rfbRectangle))
+    if (!ReadFromRFBServer((uint8_t *)&subrect, sz_rfbRectangle))
       return False;
 
     subrect.x = Swap16IfLE(subrect.x);

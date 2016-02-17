@@ -52,10 +52,10 @@ static char lastArgv[32];
 
 
 static void processTunnelArgs(char **remoteHost,
-                              int *remotePort, int localPort,
+                              uint16_t *remotePort, uint16_t localPort,
                               int *pargc, char **argv, int tunnelArgIndex);
 static void processViaArgs(char **gatewayHost, char **remoteHost,
-                           int *remotePort, int localPort,
+                           uint16_t *remotePort, uint16_t localPort,
                            int *pargc, char **argv, int tunnelArgIndex);
 static char *getCmdPattern(void);
 static Bool fillCmdPattern(char *result, char *pattern,
@@ -69,7 +69,7 @@ createTunnel(int *pargc, char **argv, int tunnelArgIndex)
 {
   char *pattern;
   char cmd[1024];
-  int localPort, remotePort;
+  uint16_t localPort, remotePort;
   char localPortStr[8];
   char remotePortStr[8];
   char *gatewayHost = "";
@@ -109,7 +109,7 @@ createTunnel(int *pargc, char **argv, int tunnelArgIndex)
 }
 
 static void
-processTunnelArgs(char **remoteHost, int *remotePort, int localPort,
+processTunnelArgs(char **remoteHost, uint16_t *remotePort, uint16_t localPort,
                   int *pargc, char **argv, int tunnelArgIndex)
 {
   char *pdisplay;
@@ -122,12 +122,12 @@ processTunnelArgs(char **remoteHost, int *remotePort, int localPort,
     usage();
 
   *pdisplay++ = '\0';
-  if (strspn(pdisplay, "-0123456789") != strlen(pdisplay))
+  if (strspn(pdisplay, "0123456789") != strlen(pdisplay))
     usage();
 
-  *remotePort = atoi(pdisplay);
+  *remotePort = (uint16_t) atoi(pdisplay);
   if (*remotePort < 100)
-    *remotePort += SERVER_PORT_OFFSET;
+    *remotePort = (uint16_t) (*remotePort + SERVER_PORT_OFFSET);
 
   sprintf(lastArgv, "localhost:%d", localPort);
 
@@ -139,11 +139,12 @@ processTunnelArgs(char **remoteHost, int *remotePort, int localPort,
 
 static void
 processViaArgs(char **gatewayHost, char **remoteHost,
-               int *remotePort, int localPort,
+               uint16_t *remotePort, uint16_t localPort,
                int *pargc, char **argv, int tunnelArgIndex)
 {
   char *colonPos;
-  int len, portOffset;
+  size_t len;
+  uint16_t portOffset;
 
   if (tunnelArgIndex >= *pargc - 2)
     usage();
@@ -165,7 +166,7 @@ processViaArgs(char **gatewayHost, char **remoteHost,
     if (!len || strspn(colonPos, "-0123456789") != len) {
       usage();
     }
-    *remotePort = atoi(colonPos) + portOffset;
+    *remotePort = (uint16_t) (atoi(colonPos) + portOffset);
   }
 
   sprintf(lastArgv, "localhost::%d", localPort);
@@ -207,7 +208,7 @@ fillCmdPattern(char *result, char *pattern,
                char *gatewayHost, char *remoteHost,
                char *remotePort, char *localPort)
 {
-  int i, j;
+  size_t i, j;
   Bool H_found = False, G_found = False, R_found = False, L_found = False;
 
   for (i=0, j=0; pattern[i] && j<1023; i++, j++) {

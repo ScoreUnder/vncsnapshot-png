@@ -16,6 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
 // USA.
 
+#include <assert.h>
+#include <stddef.h>
 #include <stdint.h>
 #include "ZlibInStream.h"
 #include "Exception.h"
@@ -87,11 +89,11 @@ size_t ZlibInStream::overrun(size_t itemSize, size_t nItems)
   end -= ptr - start;
   ptr = start;
 
-  while (end - ptr < itemSize) {
+  while ((size_t)(end - ptr) < itemSize) {
     decompress();
   }
 
-  if (itemSize * nItems > end - ptr)
+  if (itemSize * nItems > (size_t)(end - ptr))
     nItems = (end - ptr) / itemSize;
 
   return nItems;
@@ -103,13 +105,19 @@ size_t ZlibInStream::overrun(size_t itemSize, size_t nItems)
 void ZlibInStream::decompress()
 {
   zs->next_out = (uint8_t*)end;
-  zs->avail_out = start + bufSize - end;
+  ptrdiff_t avail_out = start + bufSize - end;
+  zs->avail_out = (uInt) avail_out;
+  assert(zs->avail_out == avail_out);
 
   underlying->check(1);
   zs->next_in = (uint8_t*)underlying->getptr();
-  zs->avail_in = underlying->getend() - underlying->getptr();
-  if ((size_t)zs->avail_in > bytesIn)
-    zs->avail_in = bytesIn;
+  ptrdiff_t avail_in = underlying->getend() - underlying->getptr();
+  zs->avail_in = (uInt) avail_in;
+  assert(zs->avail_in == avail_in);
+  if ((size_t)zs->avail_in > bytesIn) {
+    zs->avail_in = (uInt) bytesIn;
+    assert(zs->avail_in == bytesIn);
+  }
 
   int rc = inflate(zs, Z_SYNC_FLUSH);
   if (rc != Z_OK) {

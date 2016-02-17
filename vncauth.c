@@ -59,9 +59,6 @@ int
 vncEncryptAndStorePasswd(char *passwd, char *fname)
 {
     FILE *fp;
-    int i;
-    unsigned char encryptedPasswd[8];
-
     if ((fp = fopen(fname,"wb")) == NULL) return 1;
 
 #ifndef WIN32
@@ -69,10 +66,10 @@ vncEncryptAndStorePasswd(char *passwd, char *fname)
 #endif
 
     /* pad password with nulls */
-
-    for (i = 0; i < 8; i++) {
+    unsigned char encryptedPasswd[8];
+    for (size_t i = 0; i < 8; i++) {
         if (i < strlen(passwd)) {
-            encryptedPasswd[i] = passwd[i];
+            encryptedPasswd[i] = (unsigned char) passwd[i];
         } else {
             encryptedPasswd[i] = 0;
         }
@@ -84,10 +81,10 @@ vncEncryptAndStorePasswd(char *passwd, char *fname)
     deskey(fixedkey, EN0);
     des(encryptedPasswd, encryptedPasswd);
 
-    for (i = 0; i < 8; i++) {
+    for (size_t i = 0; i < 8; i++) {
         putc(encryptedPasswd[i], fp);
     }
-  
+
     fclose(fp);
     return 0;
 }
@@ -113,7 +110,7 @@ vncDecryptPasswdFromFile(char *fname)
             fclose(fp);
             return NULL;
         }
-        passwd[i] = ch;
+        passwd[i] = (unsigned char) ch;
     }
 
     fclose(fp);
@@ -141,7 +138,7 @@ vncEncryptBytes(unsigned char *bytes, char *passwd)
 
     for (i = 0; i < 8; i++) {
         if (i < strlen(passwd)) {
-            key[i] = passwd[i];
+            key[i] = (unsigned char) passwd[i];
         } else {
             key[i] = 0;
         }
@@ -169,7 +166,7 @@ vncEncryptPasswd( unsigned char *encryptedPasswd, char *passwd )
     /* pad password with nulls */
     for (i = 0; i < MAXPWLEN; i++) {
                 if (i < strlen(passwd)) {
-                        encryptedPasswd[i] = passwd[i];
+                        encryptedPasswd[i] = (unsigned char) passwd[i];
                 } else {        
                         encryptedPasswd[i] = 0;
                 }

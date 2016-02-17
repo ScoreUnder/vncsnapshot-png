@@ -34,7 +34,7 @@ extern "C" {
 // Instantiate the decoding function for 8, 16 and 32 BPP
 
 #define IMAGE_RECT(x,y,w,h,data)                \
-    CopyDataToScreen((char*)data,x,y,w,h);
+    CopyDataToScreen((uint8_t*)data,x,y,w,h);
 
 #define FILL_RECT(x,y,w,h,pix)                                          \
     FillBufferRectangle(x, y, w, h, pix);

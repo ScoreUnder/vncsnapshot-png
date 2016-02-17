@@ -23,20 +23,23 @@
 
 #include "vncsnapshot.h"
 
-/* jpeglib.h may redefine INT16 */
-#define INT16 jpegINT16
+#include <assert.h>
+#include <err.h>
+#include <inttypes.h>
+#include <stdbool.h>
+#include <stdint.h>
+
 #include <jpeglib.h>
 #include <stdio.h>
-#undef INT16
 
 #include <png.h>      /* PNG lib */
 #include <zlib.h>
 
-static void BufferPixelToRGB(uint32_t pixel, int *r, int *g, int *b);
+static void BufferPixelToRGB(uint32_t pixel, uint16_t *r, uint16_t *g, uint16_t *b);
 
-static char * rawBuffer = NULL;
-static char   bufferBlank = 1;
-static char   bufferWritten = 0;
+static uint8_t * rawBuffer = NULL;
+static bool bufferBlank = true;
+static bool bufferWritten = false;
 
 #define RAW_BYTES_PER_PIXEL 3   /* size of pixel in raw buffer */
 #define MY_BYTES_PER_PIXEL 4    /* size of pixel in VNC buffer */
@@ -47,7 +50,6 @@ AllocateBuffer()
 {
     uint32_t bytes;
     static const short testEndian = 1;
-    int bigEndian;
 
     /* Determine 'endian' nature of this machine */
     /* On big-endian machines, the address of a short (16 bit) is the
@@ -58,8 +60,8 @@ AllocateBuffer()
      * Intel 8x86 (including Pentium) are big-endian. Motorola, PDP-11,
      * and Sparc are little-endian.
      */
-    bigEndian = 0 == *(char *)&testEndian;
-//bigEndian = 0;
+    bool bigEndian = 0 == *(char *)&testEndian;
+
     /* Format is RGBA. Due to the way we store the pixels,
      * the 'bigEndian' is the *opposite* of the hardware value.
      */
@@ -80,10 +82,11 @@ AllocateBuffer()
     myFormat.greenMax = 0xFF;
     myFormat.blueMax = 0xFF;
 
-    bytes = si.framebufferWidth * si.framebufferHeight * myFormat.depth / 8;
+    assert(SIZE_MAX / (myFormat.depth / 8) / si.framebufferWidth >= si.framebufferHeight);
+    bytes = (uint32_t) (si.framebufferWidth * si.framebufferHeight * myFormat.depth / 8);
     rawBuffer = malloc(bytes);   /* allocate initialized to 0 */
     if (rawBuffer == NULL) {
-        fprintf(stderr, "Failed to allocate memory frame buffer, %lu bytes\n",
+        fprintf(stderr, "Failed to allocate memory frame buffer, %" PRId32 " bytes\n",
                 bytes);
         return 0;
     }
@@ -94,12 +97,13 @@ AllocateBuffer()
 }
 
 void
-CopyDataToScreen(char *buffer, int x, int y, int w, int h)
+CopyDataToScreen(uint8_t *buffer, uint32_t x, uint32_t y, uint32_t w, uint32_t h)
 {
-    int start;
-    int stride;
-    int row, col;
-    stride = si.framebufferWidth * RAW_BYTES_PER_PIXEL - w * RAW_BYTES_PER_PIXEL;
+    size_t start;
+    size_t stride;
+    size_t row, col;
+    assert(si.framebufferWidth > w);
+    stride = (size_t)(si.framebufferWidth * RAW_BYTES_PER_PIXEL - (int32_t)w * RAW_BYTES_PER_PIXEL);
     start = (x + y * si.framebufferWidth) * RAW_BYTES_PER_PIXEL;
 
     bufferWritten = 1;
@@ -107,8 +111,8 @@ CopyDataToScreen(char *buffer, int x, int y, int w, int h)
     for (row = 0; row < h; row++) {
         for (col = 0; col < w; col++) {
             bufferBlank &= buffer[0] == 0 &&
-                           buffer[1] == 0 &&
-                           buffer[2] == 0;
+                            buffer[1] == 0 &&
+                            buffer[2] == 0;
             rawBuffer[start++] = *buffer++;
             rawBuffer[start++] = *buffer++;
             rawBuffer[start++] = *buffer++;
@@ -118,21 +122,23 @@ CopyDataToScreen(char *buffer, int x, int y, int w, int h)
     }
 }
 
-char *
-CopyScreenToData(int x, int y, int w, int h)
+uint8_t *
+CopyScreenToData(uint32_t x, uint32_t y, uint32_t w, uint32_t h)
 {
-    int start;
-    int stride;
-    int row, col;
-    char *buffer;
-    char *cp;
+    size_t start;
+    size_t stride;
+    size_t row, col;
+    uint8_t *buffer;
+    uint8_t *cp;
 
-    stride = si.framebufferWidth * RAW_BYTES_PER_PIXEL - w * RAW_BYTES_PER_PIXEL;
+    assert(si.framebufferWidth > w);
+    stride = (size_t)(si.framebufferWidth * RAW_BYTES_PER_PIXEL - (int32_t)w * RAW_BYTES_PER_PIXEL);
     start = (x + y * si.framebufferWidth) * RAW_BYTES_PER_PIXEL;
 
+    assert(SIZE_MAX / w / MY_BYTES_PER_PIXEL >= (size_t) h);  /* Overflow check */
 
     /* Allocate a buffer at the VNC size, not the raw size */
-    buffer = malloc(h * w * MY_BYTES_PER_PIXEL);
+    buffer = malloc((size_t)(h * w * MY_BYTES_PER_PIXEL));
     cp = buffer;
 
     for (row = 0; row < h; row++) {
@@ -149,25 +155,25 @@ CopyScreenToData(int x, int y, int w, int h)
 }
 
 void
-FillBufferRectangle(int x, int y, int w, int h, uint32_t pixel)
+FillBufferRectangle(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t pixel)
 {
-    int r, g, b;
-    int start;
-    int stride;
-    int row, col;
+    uint16_t r, g, b;
+    size_t start;
+    size_t stride;
+    size_t row, col;
 
     BufferPixelToRGB(pixel, &r, &g, &b);
 
     bufferBlank &= r == 0 && g == 0 && b == 0;
     bufferWritten = 1;
 
-    stride = si.framebufferWidth * RAW_BYTES_PER_PIXEL - w * RAW_BYTES_PER_PIXEL;
+    stride = (size_t)(si.framebufferWidth * RAW_BYTES_PER_PIXEL - (int32_t)w * RAW_BYTES_PER_PIXEL);
     start = (x + y * si.framebufferWidth) * RAW_BYTES_PER_PIXEL;
     for (row = 0; row < h; row++) {
         for (col = 0; col < w; col++) {
-            rawBuffer[start++] = r;
-            rawBuffer[start++] = g;
-            rawBuffer[start++] = b;
+            rawBuffer[start++] = (uint8_t) r;
+            rawBuffer[start++] = (uint8_t) g;
+            rawBuffer[start++] = (uint8_t) b;
         }
         start += stride;
     }
@@ -185,160 +191,27 @@ BufferWritten()
     return bufferWritten;
 }
 
-/*
- * Borrowed with very minor modifications from JPEG6 sample code. Error handling
- * remains as default (i.e. exit on errors).
- */
-void
-write_JPEG_file (char * filename, int quality, int width, int height)
+extern void write_PNG(char *filename, int interlace, uint32_t width, uint32_t height)
 {
-  /* This struct contains the JPEG compression parameters and pointers to
-   * working space (which is allocated as needed by the JPEG library).
-   * It is possible to have several such structures, representing multiple
-   * compression/decompression processes, in existence at once.  We refer
-   * to any one struct (and its associated working data) as a "JPEG object".
-   */
-  struct jpeg_compress_struct cinfo;
-  /* This struct represents a JPEG error handler.  It is declared separately
-   * because applications often want to supply a specialized error handler
-   * (see the second half of this file for an example).  But here we just
-   * take the easy way out and use the standard error handler, which will
-   * print a message on stderr and call exit() if compression fails.
-   * Note that this struct must live as long as the main JPEG parameter
-   * struct, to avoid dangling-pointer problems.
-   */
-  struct jpeg_error_mgr jerr;
-  /* More stuff */
-  FILE * outfile;               /* target file */
-  JSAMPROW row_pointer[1];      /* pointer to JSAMPLE row[s] */
-  int row_stride;               /* physical row width in image buffer */
-
-  /* Step 1: allocate and initialize JPEG compression object */
-
-  /* We have to set up the error handler first, in case the initialization
-   * step fails.  (Unlikely, but it could happen if you are out of memory.)
-   * This routine fills in the contents of struct jerr, and returns jerr's
-   * address which we place into the link field in cinfo.
-   */
-  cinfo.err = jpeg_std_error(&jerr);
-  /* Now we can initialize the JPEG compression object. */
-  jpeg_create_compress(&cinfo);
-
-  /* Step 2: specify data destination (eg, a file) */
-  /* Note: steps 2 and 3 can be done in either order. */
-
-  /* Here we use the library-supplied code to send compressed data to a
-   * stdio stream.  You can also write your own code to do something else.
-   * VERY IMPORTANT: use "b" option to fopen() if you are on a machine that
-   * requires it in order to write binary files.
-   */
-  if (strcmp(filename, "-") == 0) {
-      outfile = stdout;
-  } else {
-      if ((outfile = fopen(filename, "wb")) == NULL) {
-          fprintf(stderr, "can't open %s\n", filename);
-          exit(1);
-      }
-  }
-  jpeg_stdio_dest(&cinfo, outfile);
-
-  /* Step 3: set parameters for compression */
-
-  /* First we supply a description of the input image.
-   * Four fields of the cinfo struct must be filled in:
-   */
-  cinfo.image_width = width;    /* image width and height, in pixels */
-  cinfo.image_height = height;
-  cinfo.input_components = RAW_BYTES_PER_PIXEL;         /* # of color components per pixel */
-  cinfo.in_color_space = JCS_RGB;       /* colorspace of input image */
-  /* Now use the library's routine to set default compression parameters.
-   * (You must set at least cinfo.in_color_space before calling this,
-   * since the defaults depend on the source color space.)
-   */
-  jpeg_set_defaults(&cinfo);
-  /* Now you can set any non-default parameters you wish to.
-   * Here we just illustrate the use of quality (quantization table) scaling:
-   */
-
-  jpeg_set_quality(&cinfo, quality, TRUE /* limit to baseline-JPEG values */);
-
-    /* VNCSNAPSHOT: Set file colourspace to RGB.
-     *   If it is not set to RGB, colour distortions occur.
-     */
-  jpeg_set_colorspace(&cinfo, JCS_RGB);
-
-  /* Step 4: Start compressor */
-
-  /* TRUE ensures that we will write a complete interchange-JPEG file.
-   * Pass TRUE unless you are very sure of what you're doing.
-   */
-  jpeg_start_compress(&cinfo, TRUE);
-
-  /* Step 5: while (scan lines remain to be written) */
-  /*           jpeg_write_scanlines(...); */
-
-  /* Here we use the library's state variable cinfo.next_scanline as the
-   * loop counter, so that we don't have to keep track ourselves.
-   * To keep things simple, we pass one scanline per call; you can pass
-   * more if you wish, though.
-   */
-  row_stride = width * 3;       /* JSAMPLEs per row in image_buffer */
-
-  while (cinfo.next_scanline < cinfo.image_height) {
-    /* jpeg_write_scanlines expects an array of pointers to scanlines.
-     * Here the array is only one element long, but you could pass
-     * more than one scanline at a time if that's more convenient.
-     */
-    row_pointer[0] = & rawBuffer[cinfo.next_scanline * row_stride];
-    (void) jpeg_write_scanlines(&cinfo, row_pointer, 1);
-  }
-
-  /* Step 6: Finish compression */
-
-  jpeg_finish_compress(&cinfo);
-  /* After finish_compress, we can close the output file. */
-  if (strcmp(filename, "-") != 0) {
-      fclose(outfile);
-  }
-
-  /* Step 7: release JPEG compression object */
-
-  /* This is an important step since it will release a good deal of memory. */
-  jpeg_destroy_compress(&cinfo);
-
-  /* And we're done! */
-}
-
-extern void write_PNG(char *filename, int interlace, int width, int height)
-{
-    int i;
     int bit_depth=0, color_type;
     png_bytep row_pointers[height];
     png_structp png_ptr;
     png_infop info_ptr;
-    FILE *outfile = fopen(filename, "wb");
 
-    for (i=0; i<height; i++)
-        {
-                //row_pointers[i] = rawBuffer + i * 4 * width; //XXX
-                row_pointers[i] = & rawBuffer[i * 3 * width];
-        }
-    
-    if (!outfile)
+    for (uint32_t i=0; i<height; i++)
     {
-        fprintf (stderr, "Error: Couldn't fopen %s.\n", filename);
-        exit(EXIT_FAILURE);
+        //row_pointers[i] = rawBuffer + i * 4 * width; //XXX
+        row_pointers[i] = & rawBuffer[i * 3 * width];
     }
-    
-    png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, 
+
+    FILE *outfile = fopen(filename, "wb");
+    if (!outfile) err(1, "couldn't fopen %s", filename);
+
+    png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING,
         (png_voidp) NULL, (png_error_ptr) NULL, (png_error_ptr) NULL);
-    
-    if (!png_ptr)
-        {
-                fprintf(stderr, "Error: Couldn't create PNG write struct.");
-                exit(1);
-        }
-    
+
+    if (!png_ptr) errx(1, "couldn't create PNG write struct");
+
     info_ptr = png_create_info_struct(png_ptr);
     if (!info_ptr)
     {
@@ -346,50 +219,50 @@ extern void write_PNG(char *filename, int interlace, int width, int height)
                 fprintf(stderr, "Error: Couldn't create PNG info struct.");
                 exit(1);
     }
-    
+
     png_init_io(png_ptr, outfile);
-    
+
     png_set_compression_level(png_ptr, Z_BEST_COMPRESSION);
-    
+
     bit_depth = 8;
     color_type = PNG_COLOR_TYPE_RGB;
     //png_set_invert_alpha(png_ptr);
     //png_set_bgr(png_ptr);
 
-    png_set_IHDR(png_ptr, info_ptr, width, height, 
-                 bit_depth, color_type, interlace, 
+    png_set_IHDR(png_ptr, info_ptr, width, height,
+                 bit_depth, color_type, interlace,
                  PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
-    
+
     png_write_info(png_ptr, info_ptr);
-    
+
     printf ("Now writing PNG file\n");
-    
+
     png_write_image(png_ptr, row_pointers);
-  
+
     png_write_end(png_ptr, info_ptr);
     /* puh, done, now freeing memory... */
     png_destroy_write_struct(&png_ptr, &info_ptr);
-    
+
     if (outfile != NULL)
         (void) fclose(outfile);
-    /*@i2@*/ } /* tell splint to ignore false warning for not 
+    /*@i2@*/ } /* tell splint to ignore false warning for not
                   released memory of png_ptr and info_ptr */
 
 static void
-BufferPixelToRGB(uint32_t pixel, int *r, int *g, int *b)
+BufferPixelToRGB(uint32_t pixel, uint16_t *r, uint16_t *g, uint16_t *b)
 {
-    *r = (pixel >> myFormat.redShift) & myFormat.redMax;
-    *b = (pixel >> myFormat.blueShift) & myFormat.blueMax;
-    *g = (pixel >> myFormat.greenShift) & myFormat.greenMax;
+    *r = (uint16_t) ((pixel >> myFormat.redShift) & myFormat.redMax);
+    *b = (uint16_t) ((pixel >> myFormat.blueShift) & myFormat.blueMax);
+    *g = (uint16_t) ((pixel >> myFormat.greenShift) & myFormat.greenMax);
 }
 
 void
-ShrinkBuffer(int32_t x, int32_t y, int32_t req_width, int32_t req_height)
+ShrinkBuffer(uint32_t x, uint32_t y, uint32_t req_width, uint32_t req_height)
 {
-    int start;
-    int stride;
-    int row, col;
-    char *cp;
+    size_t start;
+    size_t stride;
+    size_t row, col;
+    uint8_t *cp;
 
 
     /*
@@ -405,7 +278,7 @@ ShrinkBuffer(int32_t x, int32_t y, int32_t req_width, int32_t req_height)
      * with overlapping moves.
      */
 
-    stride = si.framebufferWidth * RAW_BYTES_PER_PIXEL - req_width * RAW_BYTES_PER_PIXEL;
+    stride = (size_t)(si.framebufferWidth * RAW_BYTES_PER_PIXEL - (int32_t)req_width * RAW_BYTES_PER_PIXEL);
     start = (x + y * si.framebufferWidth) * RAW_BYTES_PER_PIXEL;
 
 
@@ -419,6 +292,5 @@ ShrinkBuffer(int32_t x, int32_t y, int32_t req_width, int32_t req_height)
         }
         start += stride;
     }
-    
+
 }
-  
