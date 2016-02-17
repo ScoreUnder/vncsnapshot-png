@@ -24,8 +24,9 @@
 #ifndef __RDR_OUTSTREAM_H__
 #define __RDR_OUTSTREAM_H__
 
-#include "types.h"
-#include <string.h> // for memcpy
+#include <assert.h>
+#include <string.h>
+#include <stdint.h>
 
 namespace rdr {
 
@@ -43,7 +44,7 @@ namespace rdr {
     // itemSize bytes.  Returns the number of items which fit (up to a maximum
     // of nItems).
 
-    inline int check(int itemSize, int nItems=1)
+    inline size_t check(size_t itemSize, size_t nItems=1)
     {
       if (ptr + itemSize * nItems > end) {
         if (ptr + itemSize > end)
@@ -56,32 +57,38 @@ namespace rdr {
 
     // writeU/SN() methods write unsigned and signed N-bit integers.
 
-    inline void writeU8( U8  u) { check(1); *ptr++ = u; }
-    inline void writeU16(U16 u) { check(2); *ptr++ = u >> 8; *ptr++ = (U8)u; }
-    inline void writeU32(U32 u) { check(4); *ptr++ = u >> 24; *ptr++ = u >> 16;
-                                            *ptr++ = u >> 8; *ptr++ = u; }
+    inline void writeU8( uint8_t  u) { check(1); *ptr++ = u; }
+    inline void writeU16(uint16_t u) { check(2);
+                                       *ptr++ = (uint8_t)(u >> 8);
+                                       *ptr++ = (uint8_t)u; }
+    inline void writeU32(uint32_t u) { check(4);
+                                       *ptr++ = (uint8_t)(u >> 24);
+                                       *ptr++ = (uint8_t)(u >> 16);
+                                       *ptr++ = (uint8_t)(u >> 8);
+                                       *ptr++ = (uint8_t)u; }
 
-    inline void writeS8( S8  s) { writeU8((U8)s); }
-    inline void writeS16(S16 s) { writeU16((U16)s); }
-    inline void writeS32(S32 s) { writeU32((U32)s); }
+    inline void writeS8( int8_t  s) { writeU8( (uint8_t) s); }
+    inline void writeS16(int16_t s) { writeU16((uint16_t)s); }
+    inline void writeS32(int32_t s) { writeU32((uint32_t)s); }
 
-    // writeString() writes a string - a U32 length followed by the data.  The
+    // writeString() writes a string - a uint32_t length followed by the data.  The
     // given string should be null-terminated (but the terminating null is not
     // written to the stream).
 
     inline void writeString(const char* str) {
-      U32 len = strlen(str);
-      writeU32(len);
+      size_t len = strlen(str);
+      assert(len < UINT32_MAX);
+      writeU32((uint32_t)len);
       writeBytes(str, len);
     }
 
-    inline void pad(int bytes) {
+    inline void pad(size_t bytes) {
       while (bytes-- > 0) writeU8(0);
     }
 
-    inline void skip(int bytes) {
+    inline void skip(size_t bytes) {
       while (bytes > 0) {
-        int n = check(1, bytes);
+        size_t n = check(1, bytes);
         ptr += n;
         bytes -= n;
       }
@@ -89,11 +96,11 @@ namespace rdr {
 
     // writeBytes() writes an exact number of bytes.
 
-    virtual void writeBytes(const void* data, int length) {
-      const U8* dataPtr = (const U8*)data;
-      const U8* dataEnd = dataPtr + length;
+    virtual void writeBytes(const void* data, size_t length) {
+      const uint8_t* dataPtr = (const uint8_t*)data;
+      const uint8_t* dataEnd = dataPtr + length;
       while (dataPtr < dataEnd) {
-        int n = check(1, dataEnd - dataPtr);
+        size_t n = check(1, dataEnd - dataPtr);
         memcpy(ptr, dataPtr, n);
         ptr += n;
         dataPtr += n;
@@ -102,23 +109,27 @@ namespace rdr {
 
     // writeOpaqueN() writes a quantity without byte-swapping.
 
-    inline void writeOpaque8( U8  u) { writeU8(u); }
-    inline void writeOpaque16(U16 u) { check(2); *ptr++ = ((U8*)&u)[0];
-                                       *ptr++ = ((U8*)&u)[1]; }
-    inline void writeOpaque32(U32 u) { check(4); *ptr++ = ((U8*)&u)[0];
-                                       *ptr++ = ((U8*)&u)[1];
-                                       *ptr++ = ((U8*)&u)[2];
-                                       *ptr++ = ((U8*)&u)[3]; }
-    inline void writeOpaque24A(U32 u) { check(3); *ptr++ = ((U8*)&u)[0];
-                                        *ptr++ = ((U8*)&u)[1];
-                                        *ptr++ = ((U8*)&u)[2]; }
-    inline void writeOpaque24B(U32 u) { check(3); *ptr++ = ((U8*)&u)[1];
-                                        *ptr++ = ((U8*)&u)[2];
-                                        *ptr++ = ((U8*)&u)[3]; }
+    inline void writeOpaque8( uint8_t  u) { writeU8(u); }
+    inline void writeOpaque16(uint16_t u) { check(2);
+                                            *ptr++ = ((uint8_t*)&u)[0];
+                                            *ptr++ = ((uint8_t*)&u)[1]; }
+    inline void writeOpaque32(uint32_t u) { check(4);
+                                            *ptr++ = ((uint8_t*)&u)[0];
+                                            *ptr++ = ((uint8_t*)&u)[1];
+                                            *ptr++ = ((uint8_t*)&u)[2];
+                                            *ptr++ = ((uint8_t*)&u)[3]; }
+    inline void writeOpaque24A(uint32_t u) { check(3);
+                                             *ptr++ = ((uint8_t*)&u)[0];
+                                             *ptr++ = ((uint8_t*)&u)[1];
+                                             *ptr++ = ((uint8_t*)&u)[2]; }
+    inline void writeOpaque24B(uint32_t u) { check(3);
+                                             *ptr++ = ((uint8_t*)&u)[1];
+                                             *ptr++ = ((uint8_t*)&u)[2];
+                                             *ptr++ = ((uint8_t*)&u)[3]; }
 
     // length() returns the length of the stream.
 
-    virtual int length() = 0;
+    virtual size_t length() = 0;
 
     // flush() requests that the stream be flushed.
 
@@ -128,9 +139,9 @@ namespace rdr {
     // manipulate the buffer directly.  This is useful for a stream which is a
     // wrapper around an underlying stream.
 
-    inline U8* getptr() { return ptr; }
-    inline U8* getend() { return end; }
-    inline void setptr(U8* p) { ptr = p; }
+    inline uint8_t* getptr() { return ptr; }
+    inline uint8_t* getend() { return end; }
+    inline void setptr(uint8_t* p) { ptr = p; }
 
   private:
 
@@ -139,12 +150,12 @@ namespace rdr {
     // the number of items which fit (up to a maximum of nItems).  itemSize is
     // supposed to be "small" (a few bytes).
 
-    virtual int overrun(int itemSize, int nItems) = 0;
+    virtual size_t overrun(size_t itemSize, size_t nItems) = 0;
 
   protected:
 
-    U8* ptr;
-    U8* end;
+    uint8_t* ptr;
+    uint8_t* end;
   };
 
 }

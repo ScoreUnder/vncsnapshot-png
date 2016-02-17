@@ -39,12 +39,11 @@ using namespace rdr;
 #define __RFB_CONCAT2E(a,b) __RFB_CONCAT2(a,b)
 #endif
 
+#define PIXEL_T __RFB_CONCAT2E(__RFB_CONCAT2E(uint,BPP),_t)
 #ifdef CPIXEL
-#define PIXEL_T __RFB_CONCAT2E(rdr::U,BPP)
 #define READ_PIXEL __RFB_CONCAT2E(readOpaque,CPIXEL)
 #define ZRLE_DECODE_BPP __RFB_CONCAT2E(zrleDecode,CPIXEL)
 #else
-#define PIXEL_T __RFB_CONCAT2E(rdr::U,BPP)
 #define READ_PIXEL __RFB_CONCAT2E(readOpaque,BPP)
 #define ZRLE_DECODE_BPP __RFB_CONCAT2E(zrleDecode,BPP)
 #endif
@@ -102,16 +101,16 @@ void ZRLE_DECODE_BPP (int x, int y, int w, int h, rdr::InStream* is,
 
           for (int i = 0; i < th; i++) {
             PIXEL_T* eol = ptr + tw;
-            U8 byte = 0;
-            U8 nbits = 0;
+            uint8_t byte = 0;
+            uint8_t nbits = 0;
 
             while (ptr < eol) {
               if (nbits == 0) {
                 byte = zis->readU8();
                 nbits = 8;
               }
-              nbits -= bppp;
-              U8 index = (byte >> nbits) & ((1 << bppp) - 1) & 127;
+              nbits = (uint8_t) (nbits - bppp);
+              uint8_t index = (byte >> nbits) & ((1 << bppp) - 1) & 127;
               *ptr++ = palette[index];
             }
           }

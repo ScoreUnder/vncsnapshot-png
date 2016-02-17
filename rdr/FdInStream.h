@@ -23,6 +23,7 @@
 #ifndef __RDR_FDINSTREAM_H__
 #define __RDR_FDINSTREAM_H__
 
+#include <stdint.h>
 #include "InStream.h"
 
 namespace rdr {
@@ -31,15 +32,15 @@ namespace rdr {
 
   public:
 
-    FdInStream(int fd, int timeout=0, int bufSize=0);
+    FdInStream(int fd, int timeout=0, size_t bufSize=0);
     FdInStream(int fd, void (*blockCallback)(void*), void* blockCallbackArg=0,
-		  int bufSize=0);
+		  size_t bufSize=0);
     virtual ~FdInStream();
 
-    int getFd() { return fd; }
-    int pos();
-    void readBytes(void* data, int length);
-    int bytesInBuf() { return end - ptr; }
+    size_t getFd() { return fd; }
+    size_t pos();
+    void readBytes(void* data, size_t length);
+    size_t bytesInBuf() { return end - ptr; }
 
     void startTiming();
     void stopTiming();
@@ -47,11 +48,11 @@ namespace rdr {
     unsigned int timeWaited() { return timeWaitedIn100us; }
 
   protected:
-    int overrun(int itemSize, int nItems);
+    size_t overrun(size_t itemSize, size_t nItems);
 
   private:
     int checkReadable(int fd, int timeout);
-    int readWithTimeoutOrCallback(void* buf, int len);
+    size_t readWithTimeoutOrCallback(void* buf, size_t len);
 
     int fd;
     int timeout;
@@ -62,9 +63,9 @@ namespace rdr {
     unsigned int timeWaitedIn100us;
     unsigned int timedKbits;
 
-    int bufSize;
-    int offset;
-    U8* start;
+    size_t bufSize;
+    size_t offset;
+    uint8_t* start;
   };
 
 } // end of namespace rdr

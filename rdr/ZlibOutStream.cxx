@@ -16,6 +16,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
 // USA.
 
+#include <stdint.h>
 #include "ZlibOutStream.h"
 #include "Exception.h"
 #include <zlib.h>
@@ -24,7 +25,7 @@ using namespace rdr;
 
 enum { DEFAULT_BUF_SIZE = 16384 };
 
-ZlibOutStream::ZlibOutStream(OutStream* os, int bufSize_)
+ZlibOutStream::ZlibOutStream(OutStream* os, size_t bufSize_)
   : underlying(os), bufSize(bufSize_ ? bufSize_ : DEFAULT_BUF_SIZE), offset(0)
 {
   zs = new z_stream;
@@ -35,7 +36,7 @@ ZlibOutStream::ZlibOutStream(OutStream* os, int bufSize_)
     delete zs;
     throw Exception("ZlibOutStream: deflateInit failed");
   }
-  ptr = start = new U8[bufSize];
+  ptr = start = new uint8_t[bufSize];
   end = start + bufSize;
 }
 
@@ -55,7 +56,7 @@ void ZlibOutStream::setUnderlying(OutStream* os)
   underlying = os;
 }
 
-int ZlibOutStream::length()
+size_t ZlibOutStream::length()
 {
   return offset + ptr - start;
 }
@@ -90,7 +91,7 @@ void ZlibOutStream::flush()
   ptr = start;
 }
 
-int ZlibOutStream::overrun(int itemSize, int nItems)
+size_t ZlibOutStream::overrun(size_t itemSize, size_t nItems)
 {
 //    fprintf(stderr,"ZlibOutStream overrun\n");
 

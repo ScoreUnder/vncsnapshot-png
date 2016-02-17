@@ -24,6 +24,7 @@
 #ifndef __RDR_ZLIBOUTSTREAM_H__
 #define __RDR_ZLIBOUTSTREAM_H__
 
+#include <stdint.h>
 #include "OutStream.h"
 
 struct z_stream_s;
@@ -34,22 +35,22 @@ namespace rdr {
 
   public:
 
-    ZlibOutStream(OutStream* os=0, int bufSize=0);
+    ZlibOutStream(OutStream* os=0, size_t bufSize=0);
     virtual ~ZlibOutStream();
 
     void setUnderlying(OutStream* os);
     void flush();
-    int length();
+    size_t length();
 
   private:
 
-    int overrun(int itemSize, int nItems);
+    size_t overrun(size_t itemSize, size_t nItems);
 
     OutStream* underlying;
-    int bufSize;
-    int offset;
+    size_t bufSize;
+    size_t offset;
     z_stream_s* zs;
-    U8* start;
+    uint8_t* start;
   };
 
 } // end of namespace rdr

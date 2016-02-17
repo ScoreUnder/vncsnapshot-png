@@ -22,6 +22,7 @@
 // Decode function for Zlib Run-length Encoding (ZRLE).
 //
 
+#include <stdint.h>
 #include "rdr/ZlibInStream.h"
 #include "rdr/FdInStream.h"
 #include "rdr/Exception.h"
@@ -60,8 +61,8 @@ extern "C" {
 #undef BPP
 
 
-#define BUFFER_SIZE (rfbZRLETileWidth * rfbZRLETileHeight * 4)
-static char buffer[BUFFER_SIZE];
+#define BUFFER_SIZE (rfbZRLETileWidth * rfbZRLETileHeight)
+static uint32_t buffer[BUFFER_SIZE];
 
 rdr::ZlibInStream zis;
 extern rdr::FdInStream* fis;
@@ -72,11 +73,11 @@ Bool zrleDecode(int x, int y, int w, int h)
     switch (myFormat.bitsPerPixel) {
 
     case 8:
-      zrleDecode8( x,y,w,h,fis,&zis,(rdr::U8*)buffer);
+      zrleDecode8( x,y,w,h,fis,&zis,(uint8_t*)buffer);
       break;
 
     case 16:
-      zrleDecode16(x,y,w,h,fis,&zis,(rdr::U16*)buffer);
+      zrleDecode16(x,y,w,h,fis,&zis,(uint16_t*)buffer);
       break;
 
     case 32:
@@ -92,16 +93,16 @@ Bool zrleDecode(int x, int y, int w, int h)
       if ((fitsInLS3Bytes && !myFormat.bigEndian) ||
           (fitsInMS3Bytes && myFormat.bigEndian))
       {
-        zrleDecode24A(x,y,w,h,fis,&zis,(rdr::U32*)buffer);
+        zrleDecode24A(x,y,w,h,fis,&zis,buffer);
       }
       else if ((fitsInLS3Bytes && myFormat.bigEndian) ||
                (fitsInMS3Bytes && !myFormat.bigEndian))
       {
-        zrleDecode24B(x,y,w,h,fis,&zis,(rdr::U32*)buffer);
+        zrleDecode24B(x,y,w,h,fis,&zis,buffer);
       }
       else
       {
-        zrleDecode32(x,y,w,h,fis,&zis,(rdr::U32*)buffer);
+        zrleDecode32(x,y,w,h,fis,&zis,buffer);
       }
       break;
     }

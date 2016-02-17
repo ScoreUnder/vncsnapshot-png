@@ -16,6 +16,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
 // USA.
 
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
@@ -39,10 +40,10 @@ using namespace rdr;
 enum { DEFAULT_BUF_SIZE = 16384,
        MIN_BULK_SIZE = 1024 };
 
-FdOutStream::FdOutStream(int fd_, int bufSize_)
+FdOutStream::FdOutStream(int fd_, size_t bufSize_)
   : fd(fd_), bufSize(bufSize_ ? bufSize_ : DEFAULT_BUF_SIZE), offset(0)
 {
-  ptr = start = new U8[bufSize];
+  ptr = start = new uint8_t[bufSize];
   end = start + bufSize;
 }
 
@@ -56,19 +57,19 @@ FdOutStream::~FdOutStream()
 }
 
 
-void FdOutStream::writeBytes(const void* data, int length)
+void FdOutStream::writeBytes(const void* data, size_t length)
 {
   if (length < MIN_BULK_SIZE) {
     OutStream::writeBytes(data, length);
     return;
   }
 
-  const U8* dataPtr = (const U8*)data;
+  const uint8_t* dataPtr = (const uint8_t*)data;
 
   flush();
 
   while (length > 0) {
-    int n = write(fd, dataPtr, length);
+    ssize_t n = write(fd, dataPtr, length);
 
     if (n < 0) throw SystemException("write",errno);
 
@@ -78,16 +79,16 @@ void FdOutStream::writeBytes(const void* data, int length)
   }
 }
 
-int FdOutStream::length()
+size_t FdOutStream::length()
 {
   return offset + ptr - start;
 }
 
 void FdOutStream::flush()
 {
-  U8* sentUpTo = start;
+  uint8_t* sentUpTo = start;
   while (sentUpTo < ptr) {
-    int n = write(fd, (const void*) sentUpTo, ptr - sentUpTo);
+    ssize_t n = write(fd, (const void*) sentUpTo, ptr - sentUpTo);
 
     if (n < 0) throw SystemException("write",errno);
 
@@ -99,7 +100,7 @@ void FdOutStream::flush()
 }
 
 
-int FdOutStream::overrun(int itemSize, int nItems)
+size_t FdOutStream::overrun(size_t itemSize, size_t nItems)
 {
   if (itemSize > bufSize)
     throw Exception("FdOutStream overrun: max itemSize exceeded");

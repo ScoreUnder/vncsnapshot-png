@@ -16,6 +16,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
 // USA.
 
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
@@ -44,22 +45,22 @@ using namespace rdr;
 enum { DEFAULT_BUF_SIZE = 8192,
        MIN_BULK_SIZE = 1024 };
 
-FdInStream::FdInStream(int fd_, int timeout_, int bufSize_)
+FdInStream::FdInStream(int fd_, int timeout_, size_t bufSize_)
   : fd(fd_), timeout(timeout_), blockCallback(0), blockCallbackArg(0),
     timing(false), timeWaitedIn100us(5), timedKbits(0),
     bufSize(bufSize_ ? bufSize_ : DEFAULT_BUF_SIZE), offset(0)
 {
-  ptr = end = start = new U8[bufSize];
+  ptr = end = start = new uint8_t[bufSize];
 }
 
 FdInStream::FdInStream(int fd_, void (*blockCallback_)(void*),
-                       void* blockCallbackArg_, int bufSize_)
+                       void* blockCallbackArg_, size_t bufSize_)
   : fd(fd_), timeout(0), blockCallback(blockCallback_),
     blockCallbackArg(blockCallbackArg_),
     timing(false), timeWaitedIn100us(5), timedKbits(0),
     bufSize(bufSize_ ? bufSize_ : DEFAULT_BUF_SIZE), offset(0)
 {
-  ptr = end = start = new U8[bufSize];
+  ptr = end = start = new uint8_t[bufSize];
 }
 
 FdInStream::~FdInStream()
@@ -68,21 +69,21 @@ FdInStream::~FdInStream()
 }
 
 
-int FdInStream::pos()
+size_t FdInStream::pos()
 {
   return offset + ptr - start;
 }
 
-void FdInStream::readBytes(void* data, int length)
+void FdInStream::readBytes(void* data, size_t length)
 {
   if (length < MIN_BULK_SIZE) {
     InStream::readBytes(data, length);
     return;
   }
 
-  U8* dataPtr = (U8*)data;
+  uint8_t* dataPtr = (uint8_t*)data;
 
-  int n = end - ptr;
+  size_t n = end - ptr;
   if (n > length) n = length;
 
   memcpy(dataPtr, ptr, n);
@@ -99,7 +100,7 @@ void FdInStream::readBytes(void* data, int length)
 }
 
 
-int FdInStream::overrun(int itemSize, int nItems)
+size_t FdInStream::overrun(size_t itemSize, size_t nItems)
 {
   if (itemSize > bufSize)
     throw Exception("FdInStream overrun: max itemSize exceeded");
@@ -112,7 +113,7 @@ int FdInStream::overrun(int itemSize, int nItems)
   ptr = start;
 
   while (end < start + itemSize) {
-    int n = readWithTimeoutOrCallback((U8*)end, start + bufSize - end);
+    size_t n = readWithTimeoutOrCallback((uint8_t*)end, start + bufSize - end);
     end += n;
   }
 
@@ -165,13 +166,13 @@ static void gettimeofday(struct timeval* tv, void*)
 }
 #endif
 
-int FdInStream::readWithTimeoutOrCallback(void* buf, int len)
+size_t FdInStream::readWithTimeoutOrCallback(void* buf, size_t len)
 {
   struct timeval before, after;
   if (timing)
     gettimeofday(&before, 0);
 
-  int n = checkReadable(fd, timeout);
+  size_t n = checkReadable(fd, timeout);
 
   if (n < 0) throw SystemException("select",errno);
 

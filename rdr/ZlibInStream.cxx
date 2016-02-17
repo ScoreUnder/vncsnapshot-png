@@ -16,6 +16,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
 // USA.
 
+#include <stdint.h>
 #include "ZlibInStream.h"
 #include "Exception.h"
 #include <zlib.h>
@@ -24,7 +25,7 @@ using namespace rdr;
 
 enum { DEFAULT_BUF_SIZE = 16384 };
 
-ZlibInStream::ZlibInStream(int bufSize_)
+ZlibInStream::ZlibInStream(size_t bufSize_)
   : underlying(0), bufSize(bufSize_ ? bufSize_ : DEFAULT_BUF_SIZE), offset(0),
     bytesIn(0)
 {
@@ -38,7 +39,7 @@ ZlibInStream::ZlibInStream(int bufSize_)
     delete zs;
     throw Exception("ZlibInStream: inflateInit failed");
   }
-  ptr = end = start = new U8[bufSize];
+  ptr = end = start = new uint8_t[bufSize];
 }
 
 ZlibInStream::~ZlibInStream()
@@ -48,14 +49,14 @@ ZlibInStream::~ZlibInStream()
   delete zs;
 }
 
-void ZlibInStream::setUnderlying(InStream* is, int bytesIn_)
+void ZlibInStream::setUnderlying(InStream* is, size_t bytesIn_)
 {
   underlying = is;
   bytesIn = bytesIn_;
   ptr = end = start;
 }
 
-int ZlibInStream::pos()
+size_t ZlibInStream::pos()
 {
   return offset + ptr - start;
 }
@@ -72,7 +73,7 @@ void ZlibInStream::reset()
   underlying = 0;
 }
 
-int ZlibInStream::overrun(int itemSize, int nItems)
+size_t ZlibInStream::overrun(size_t itemSize, size_t nItems)
 {
   if (itemSize > bufSize)
     throw Exception("ZlibInStream overrun: max itemSize exceeded");
@@ -101,13 +102,13 @@ int ZlibInStream::overrun(int itemSize, int nItems)
 
 void ZlibInStream::decompress()
 {
-  zs->next_out = (U8*)end;
+  zs->next_out = (uint8_t*)end;
   zs->avail_out = start + bufSize - end;
 
   underlying->check(1);
-  zs->next_in = (U8*)underlying->getptr();
+  zs->next_in = (uint8_t*)underlying->getptr();
   zs->avail_in = underlying->getend() - underlying->getptr();
-  if ((int)zs->avail_in > bytesIn)
+  if ((size_t)zs->avail_in > bytesIn)
     zs->avail_in = bytesIn;
 
   int rc = inflate(zs, Z_SYNC_FLUSH);

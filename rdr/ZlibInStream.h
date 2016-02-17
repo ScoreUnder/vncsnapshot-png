@@ -24,6 +24,7 @@
 #ifndef __RDR_ZLIBINSTREAM_H__
 #define __RDR_ZLIBINSTREAM_H__
 
+#include <stdint.h>
 #include "InStream.h"
 
 struct z_stream_s;
@@ -34,24 +35,24 @@ namespace rdr {
 
   public:
 
-    ZlibInStream(int bufSize=0);
+    ZlibInStream(size_t bufSize=0);
     virtual ~ZlibInStream();
 
-    void setUnderlying(InStream* is, int bytesIn);
+    void setUnderlying(InStream* is, size_t bytesIn);
     void reset();
-    int pos();
+    size_t pos();
 
   private:
 
-    int overrun(int itemSize, int nItems);
+    size_t overrun(size_t itemSize, size_t nItems);
     void decompress();
 
     InStream* underlying;
-    int bufSize;
-    int offset;
+    size_t bufSize;
+    size_t offset;
     z_stream_s* zs;
-    int bytesIn;
-    U8* start;
+    size_t bytesIn;
+    uint8_t* start;
   };
 
 } // end of namespace rdr

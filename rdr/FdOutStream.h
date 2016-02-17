@@ -23,6 +23,7 @@
 #ifndef __RDR_FDOUTSTREAM_H__
 #define __RDR_FDOUTSTREAM_H__
 
+#include <stdint.h>
 #include "OutStream.h"
 
 namespace rdr {
@@ -31,21 +32,21 @@ namespace rdr {
 
   public:
 
-    FdOutStream(int fd, int bufSize=0);
+    FdOutStream(int fd, size_t bufSize=0);
     virtual ~FdOutStream();
 
     int getFd() { return fd; }
 
     void flush();
-    int length();
-    void writeBytes(const void* data, int length);
+    size_t length();
+    void writeBytes(const void* data, size_t length);
 
   private:
-    int overrun(int itemSize, int nItems);
+    size_t overrun(size_t itemSize, size_t nItems);
     int fd;
-    int bufSize;
-    int offset;
-    U8* start;
+    size_t bufSize;
+    size_t offset;
+    uint8_t* start;
   };
 
 }

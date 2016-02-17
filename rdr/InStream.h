@@ -24,7 +24,7 @@
 #ifndef __RDR_INSTREAM_H__
 #define __RDR_INSTREAM_H__
 
-#include "types.h"
+#include <stdint.h>
 #include <string.h> // for memcpy
 
 namespace rdr {
@@ -39,7 +39,7 @@ namespace rdr {
     // itemSize bytes.  Returns the number of items in the buffer (up to a
     // maximum of nItems).
 
-    inline int check(int itemSize, int nItems=1)
+    inline size_t check(size_t itemSize, size_t nItems=1)
     {
       if (ptr + itemSize * nItems > end) {
         if (ptr + itemSize > end)
@@ -52,18 +52,18 @@ namespace rdr {
 
     // readU/SN() methods read unsigned and signed N-bit integers.
 
-    inline U8  readU8()  { check(1); return *ptr++; }
-    inline U16 readU16() { check(2); int b0 = *ptr++; int b1 = *ptr++;
-                           return b0 << 8 | b1; }
-    inline U32 readU32() { check(4); int b0 = *ptr++; int b1 = *ptr++;
+    inline uint8_t  readU8()  { check(1); return *ptr++; }
+    inline uint16_t readU16() { check(2); int b0 = *ptr++; int b1 = *ptr++;
+                           return (uint16_t) (b0 << 8 | b1); }
+    inline uint32_t readU32() { check(4); int b0 = *ptr++; int b1 = *ptr++;
                                      int b2 = *ptr++; int b3 = *ptr++;
-                           return b0 << 24 | b1 << 16 | b2 << 8 | b3; }
+                           return (uint32_t) (b0 << 24 | b1 << 16 | b2 << 8 | b3); }
 
-    inline S8  readS8()  { return (S8) readU8();  }
-    inline S16 readS16() { return (S16)readU16(); }
-    inline S32 readS32() { return (S32)readU32(); }
+    inline int8_t  readS8()  { return (int8_t) readU8();  }
+    inline int16_t readS16() { return (int16_t)readU16(); }
+    inline int32_t readS32() { return (int32_t)readU32(); }
 
-    // readString() reads a string - a U32 length followed by the data.
+    // readString() reads a string - a uint32_t length followed by the data.
     // Returns a null-terminated string - the caller should delete[] it
     // afterwards.
 
@@ -72,11 +72,11 @@ namespace rdr {
     // maxStringLength protects against allocating a huge buffer.  Set it
     // higher if you need longer strings.
 
-    static U32 maxStringLength;
+    static uint32_t maxStringLength;
 
-    inline void skip(int bytes) {
+    inline void skip(size_t bytes) {
       while (bytes > 0) {
-        int n = check(1, bytes);
+        size_t n = check(1, bytes);
         ptr += n;
         bytes -= n;
       }
@@ -84,11 +84,11 @@ namespace rdr {
 
     // readBytes() reads an exact number of bytes.
 
-    virtual void readBytes(void* data, int length) {
-      U8* dataPtr = (U8*)data;
-      U8* dataEnd = dataPtr + length;
+    virtual void readBytes(void* data, size_t length) {
+      uint8_t* dataPtr = (uint8_t*)data;
+      uint8_t* dataEnd = dataPtr + length;
       while (dataPtr < dataEnd) {
-        int n = check(1, dataEnd - dataPtr);
+        size_t n = check(1, dataEnd - dataPtr);
         memcpy(dataPtr, ptr, n);
         ptr += n;
         dataPtr += n;
@@ -97,30 +97,30 @@ namespace rdr {
 
     // readOpaqueN() reads a quantity without byte-swapping.
 
-    inline U8  readOpaque8()  { return readU8(); }
-    inline U16 readOpaque16() { check(2); U16 r; ((U8*)&r)[0] = *ptr++;
-                                ((U8*)&r)[1] = *ptr++; return r; }
-    inline U32 readOpaque32() { check(4); U32 r; ((U8*)&r)[0] = *ptr++;
-                                ((U8*)&r)[1] = *ptr++; ((U8*)&r)[2] = *ptr++;
-                                ((U8*)&r)[3] = *ptr++; return r; }
-    inline U32 readOpaque24A() { check(3); U32 r=0; ((U8*)&r)[0] = *ptr++;
-                                 ((U8*)&r)[1] = *ptr++; ((U8*)&r)[2] = *ptr++;
+    inline uint8_t  readOpaque8()  { return readU8(); }
+    inline uint16_t readOpaque16() { check(2); uint16_t r; ((uint8_t*)&r)[0] = *ptr++;
+                                ((uint8_t*)&r)[1] = *ptr++; return r; }
+    inline uint32_t readOpaque32() { check(4); uint32_t r; ((uint8_t*)&r)[0] = *ptr++;
+                                ((uint8_t*)&r)[1] = *ptr++; ((uint8_t*)&r)[2] = *ptr++;
+                                ((uint8_t*)&r)[3] = *ptr++; return r; }
+    inline uint32_t readOpaque24A() { check(3); uint32_t r=0; ((uint8_t*)&r)[0] = *ptr++;
+                                 ((uint8_t*)&r)[1] = *ptr++; ((uint8_t*)&r)[2] = *ptr++;
                                  return r; }
-    inline U32 readOpaque24B() { check(3); U32 r=0; ((U8*)&r)[1] = *ptr++;
-                                 ((U8*)&r)[2] = *ptr++; ((U8*)&r)[3] = *ptr++;
+    inline uint32_t readOpaque24B() { check(3); uint32_t r=0; ((uint8_t*)&r)[1] = *ptr++;
+                                 ((uint8_t*)&r)[2] = *ptr++; ((uint8_t*)&r)[3] = *ptr++;
                                  return r; }
 
     // pos() returns the position in the stream.
 
-    virtual int pos() = 0;
+    virtual size_t pos() = 0;
 
     // getptr(), getend() and setptr() are "dirty" methods which allow you to
     // manipulate the buffer directly.  This is useful for a stream which is a
     // wrapper around an underlying stream.
 
-    inline const U8* getptr() const { return ptr; }
-    inline const U8* getend() const { return end; }
-    inline void setptr(const U8* p) { ptr = p; }
+    inline const uint8_t* getptr() const { return ptr; }
+    inline const uint8_t* getend() const { return end; }
+    inline void setptr(const uint8_t* p) { ptr = p; }
 
   private:
 
@@ -129,13 +129,13 @@ namespace rdr {
     // the number of items in the buffer (up to a maximum of nItems).  itemSize
     // is supposed to be "small" (a few bytes).
 
-    virtual int overrun(int itemSize, int nItems) = 0;
+    virtual size_t overrun(size_t itemSize, size_t nItems) = 0;
 
   protected:
 
     InStream() {}
-    const U8* ptr;
-    const U8* end;
+    const uint8_t* ptr;
+    const uint8_t* end;
   };
 
 }

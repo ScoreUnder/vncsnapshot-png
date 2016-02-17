@@ -16,16 +16,17 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
 // USA.
 
+#include <stdint.h>
 #include "InStream.h"
 #include "Exception.h"
 
 using namespace rdr;
 
-U32 InStream::maxStringLength = 65535;
+uint32_t InStream::maxStringLength = 65535;
 
 char* InStream::readString()
 {
-  U32 len = readU32();
+  uint32_t len = readU32();
   if (len > maxStringLength)
     throw Exception("InStream max string length exceeded");
   char* str = new char[len+1];
