@@ -73,17 +73,17 @@ Bool pendingFormatChange = False;
  * Macro to compare pixel formats.
  */
 
-#define PF_EQ(x,y)							\
-	((x.bitsPerPixel == y.bitsPerPixel) &&				\
-	 (x.depth == y.depth) &&					\
-	 ((x.bigEndian == y.bigEndian) || (x.bitsPerPixel == 8)) &&	\
-	 (x.trueColour == y.trueColour) &&				\
-	 (!x.trueColour || ((x.redMax == y.redMax) &&			\
-			    (x.greenMax == y.greenMax) &&		\
-			    (x.blueMax == y.blueMax) &&			\
-			    (x.redShift == y.redShift) &&		\
-			    (x.greenShift == y.greenShift) &&		\
-			    (x.blueShift == y.blueShift))))
+#define PF_EQ(x,y)                                                      \
+        ((x.bitsPerPixel == y.bitsPerPixel) &&                          \
+         (x.depth == y.depth) &&                                        \
+         ((x.bigEndian == y.bigEndian) || (x.bitsPerPixel == 8)) &&     \
+         (x.trueColour == y.trueColour) &&                              \
+         (!x.trueColour || ((x.redMax == y.redMax) &&                   \
+                            (x.greenMax == y.greenMax) &&               \
+                            (x.blueMax == y.blueMax) &&                 \
+                            (x.redShift == y.redShift) &&               \
+                            (x.greenShift == y.greenShift) &&           \
+                            (x.blueShift == y.blueShift))))
 
 int currentEncoding = rfbEncodingZRLE;
 Bool pendingEncodingChange = False;
@@ -209,9 +209,9 @@ InitialiseRFBConnection()
     if (appData.passwordFile) {
       passwd = vncDecryptPasswdFromFile(appData.passwordFile);
       if (!passwd) {
-	fprintf(stderr,"Cannot read valid password from file \"%s\"\n",
-		appData.passwordFile);
-	return False;
+        fprintf(stderr,"Cannot read valid password from file \"%s\"\n",
+                appData.passwordFile);
+        return False;
       }
     } else {
       passwd = getpass("Password: ");
@@ -227,7 +227,7 @@ InitialiseRFBConnection()
 
     vncEncryptBytes(challenge, passwd);
 
-	/* Lose the password from memory */
+        /* Lose the password from memory */
     for (i = strlen(passwd); i >= 0; i--) {
       passwd[i] = '\0';
     }
@@ -252,14 +252,14 @@ InitialiseRFBConnection()
       return False;
     default:
       fprintf(stderr,"Unknown VNC authentication result: %d\n",
-	      (int)authResult);
+              (int)authResult);
       return False;
     }
     break;
 
   default:
     fprintf(stderr,"Unknown authentication scheme from VNC server: %d\n",
-	    (int)authScheme);
+            (int)authScheme);
     return False;
   }
 
@@ -354,37 +354,37 @@ Bool SendSetEncodings()
     do {
       char *nextEncStr = strchr(encStr, ' ');
       if (nextEncStr) {
-	encStrLen = nextEncStr - encStr;
-	nextEncStr++;
+        encStrLen = nextEncStr - encStr;
+        nextEncStr++;
       } else {
-	encStrLen = strlen(encStr);
+        encStrLen = strlen(encStr);
       }
 
       if (strncasecmp(encStr,"raw",encStrLen) == 0) {
-	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingRaw);
+        encs[se->nEncodings++] = Swap32IfLE(rfbEncodingRaw);
       } else if (strncasecmp(encStr,"copyrect",encStrLen) == 0) {
-	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingCopyRect);
+        encs[se->nEncodings++] = Swap32IfLE(rfbEncodingCopyRect);
       } else if (strncasecmp(encStr,"tight",encStrLen) == 0) {
-	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingTight);
-	requestLastRectEncoding = True;
-	if (appData.compressLevel >= 0 && appData.compressLevel <= 9)
-	  requestCompressLevel = True;
-	if (appData.enableJPEG)
-	  requestQualityLevel = True;
+        encs[se->nEncodings++] = Swap32IfLE(rfbEncodingTight);
+        requestLastRectEncoding = True;
+        if (appData.compressLevel >= 0 && appData.compressLevel <= 9)
+          requestCompressLevel = True;
+        if (appData.enableJPEG)
+          requestQualityLevel = True;
       } else if (strncasecmp(encStr,"hextile",encStrLen) == 0) {
-	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingHextile);
+        encs[se->nEncodings++] = Swap32IfLE(rfbEncodingHextile);
       } else if (strncasecmp(encStr,"zlib",encStrLen) == 0) {
-	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingZlib);
-	if (appData.compressLevel >= 0 && appData.compressLevel <= 9)
-	  requestCompressLevel = True;
+        encs[se->nEncodings++] = Swap32IfLE(rfbEncodingZlib);
+        if (appData.compressLevel >= 0 && appData.compressLevel <= 9)
+          requestCompressLevel = True;
       } else if (strncasecmp(encStr,"corre",encStrLen) == 0) {
-	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingCoRRE);
+        encs[se->nEncodings++] = Swap32IfLE(rfbEncodingCoRRE);
       } else if (strncasecmp(encStr,"rre",encStrLen) == 0) {
-	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingRRE);
+        encs[se->nEncodings++] = Swap32IfLE(rfbEncodingRRE);
       } else if (strncasecmp(encStr,"zrle",encStrLen) == 0) {
-	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingZRLE);
+        encs[se->nEncodings++] = Swap32IfLE(rfbEncodingZRLE);
       } else {
-	fprintf(stderr,"Unknown encoding '%.*s'\n",encStrLen,encStr);
+        fprintf(stderr,"Unknown encoding '%.*s'\n",encStrLen,encStr);
       }
 
       encStr = nextEncStr;
@@ -392,22 +392,22 @@ Bool SendSetEncodings()
 
     if (se->nEncodings < MAX_ENCODINGS && requestCompressLevel) {
       encs[se->nEncodings++] = Swap32IfLE(appData.compressLevel +
-					  rfbEncodingCompressLevel0);
+                                          rfbEncodingCompressLevel0);
     }
 
     if (se->nEncodings < MAX_ENCODINGS && requestQualityLevel) {
       if (appData.qualityLevel < 0 || appData.qualityLevel > 9)
         appData.qualityLevel = 5;
       encs[se->nEncodings++] = Swap32IfLE(appData.qualityLevel +
-					  rfbEncodingQualityLevel0);
+                                          rfbEncodingQualityLevel0);
     }
 
       if (se->nEncodings < MAX_ENCODINGS)
-	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingXCursor);
+        encs[se->nEncodings++] = Swap32IfLE(rfbEncodingXCursor);
       if (se->nEncodings < MAX_ENCODINGS)
-	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingRichCursor);
+        encs[se->nEncodings++] = Swap32IfLE(rfbEncodingRichCursor);
       if (se->nEncodings < MAX_ENCODINGS)
-	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingPointerPos);
+        encs[se->nEncodings++] = Swap32IfLE(rfbEncodingPointerPos);
 
     if (se->nEncodings < MAX_ENCODINGS && requestLastRectEncoding) {
       encs[se->nEncodings++] = Swap32IfLE(rfbEncodingLastRect);
@@ -416,12 +416,12 @@ Bool SendSetEncodings()
     if (sameMachine) {
       if (!tunnelSpecified) {
         if (!appData.quiet) {
-	  fprintf(stderr,"Same machine: preferring raw encoding\n");
+          fprintf(stderr,"Same machine: preferring raw encoding\n");
         }
         currentEncoding = rfbEncodingRaw;
       } else {
         if (!appData.quiet) {
-	  fprintf(stderr,"Tunneling active: preferring tight encoding\n");
+          fprintf(stderr,"Tunneling active: preferring tight encoding\n");
         }
         currentEncoding = rfbEncodingTight;
       }
@@ -438,20 +438,20 @@ Bool SendSetEncodings()
 
     if (appData.compressLevel >= 0 && appData.compressLevel <= 9) {
       encs[se->nEncodings++] = Swap32IfLE(appData.compressLevel +
-					  rfbEncodingCompressLevel0);
+                                          rfbEncodingCompressLevel0);
     } else if (!tunnelSpecified) {
       /* If -tunnel option was provided, we assume that server machine is
-	 not in the local network so we use default compression level for
-	 tight encoding instead of fast compression. Thus we are
-	 requesting level 1 compression only if tunneling is not used. */
+         not in the local network so we use default compression level for
+         tight encoding instead of fast compression. Thus we are
+         requesting level 1 compression only if tunneling is not used. */
       encs[se->nEncodings++] = Swap32IfLE(rfbEncodingCompressLevel1);
     }
 
     if (appData.enableJPEG) {
       if (appData.qualityLevel < 0 || appData.qualityLevel > 9)
-	appData.qualityLevel = 5;
+        appData.qualityLevel = 5;
       encs[se->nEncodings++] = Swap32IfLE(appData.qualityLevel +
-					  rfbEncodingQualityLevel0);
+                                          rfbEncodingQualityLevel0);
     }
 
       if (se->nEncodings < MAX_ENCODINGS)
@@ -459,7 +459,7 @@ Bool SendSetEncodings()
       if (se->nEncodings < MAX_ENCODINGS)
         encs[se->nEncodings++] = Swap32IfLE(rfbEncodingRichCursor);
       if (se->nEncodings < MAX_ENCODINGS)
-	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingPointerPos);
+        encs[se->nEncodings++] = Swap32IfLE(rfbEncodingPointerPos);
 
   }
 
@@ -479,7 +479,7 @@ Bool
 SendIncrementalFramebufferUpdateRequest()
 {
   return SendFramebufferUpdateRequest(0, 0, si.framebufferWidth,
-				      si.framebufferHeight, True);
+                                      si.framebufferHeight, True);
 }
 
 Bool RequestNewUpdate()
@@ -520,14 +520,14 @@ HandleRFBServerMessage()
     int i;
 
     if (!ReadFromRFBServer(((char *)&msg.fu) + 1,
-			   sz_rfbFramebufferUpdateMsg - 1))
+                           sz_rfbFramebufferUpdateMsg - 1))
       return False;
 
     msg.fu.nRects = Swap16IfLE(msg.fu.nRects);
 
     for (i = 0; i < msg.fu.nRects; i++) {
       if (!ReadFromRFBServer((char *)&rect, sz_rfbFramebufferUpdateRectHeader))
-	return False;
+        return False;
 
       rect.encoding = Swap32IfLE(rect.encoding);
       if (rect.encoding == rfbEncodingLastRect)
@@ -539,72 +539,72 @@ HandleRFBServerMessage()
       rect.r.h = Swap16IfLE(rect.r.h);
 
       if (rect.encoding == rfbEncodingXCursor) {
-	if (!HandleCursorShape(rect.r.x, rect.r.y, rect.r.w, rect.r.h, rfbEncodingXCursor)) {
-	  return False;
-	}
+        if (!HandleCursorShape(rect.r.x, rect.r.y, rect.r.w, rect.r.h, rfbEncodingXCursor)) {
+          return False;
+        }
         continue;
       }
       if (rect.encoding == rfbEncodingRichCursor) {
-	if (!HandleCursorShape(rect.r.x, rect.r.y, rect.r.w, rect.r.h, rfbEncodingRichCursor)) {
-	  return False;
-	}
+        if (!HandleCursorShape(rect.r.x, rect.r.y, rect.r.w, rect.r.h, rfbEncodingRichCursor)) {
+          return False;
+        }
         continue;
       }
 
       if (rect.encoding == rfbEncodingPointerPos) {
-	if (!HandleCursorPos(rect.r.x, rect.r.y)) {
-	  return False;
-	}
+        if (!HandleCursorPos(rect.r.x, rect.r.y)) {
+          return False;
+        }
         appData.gotCursorPos = 1;
-	continue;
+        continue;
       }
 
       if ((rect.r.x + rect.r.w > si.framebufferWidth) ||
-	  (rect.r.y + rect.r.h > si.framebufferHeight))
-	{
-	  fprintf(stderr,"Rect too large: %dx%d at (%d, %d)\n",
-		  rect.r.w, rect.r.h, rect.r.x, rect.r.y);
-	  return False;
-	}
+          (rect.r.y + rect.r.h > si.framebufferHeight))
+        {
+          fprintf(stderr,"Rect too large: %dx%d at (%d, %d)\n",
+                  rect.r.w, rect.r.h, rect.r.x, rect.r.y);
+          return False;
+        }
 
       if ((rect.r.h * rect.r.w) == 0) {
-	fprintf(stderr,"Zero size rect - ignoring\n");
-	continue;
+        fprintf(stderr,"Zero size rect - ignoring\n");
+        continue;
       }
 
       /* If RichCursor encoding is used, we should prevent collisions
-	 between framebuffer updates and cursor drawing operations. */
+         between framebuffer updates and cursor drawing operations. */
       SoftCursorLockArea(rect.r.x, rect.r.y, rect.r.w, rect.r.h);
 
       switch (rect.encoding) {
 
       case rfbEncodingRaw:
 
-	bytesPerLine = rect.r.w * myFormat.bitsPerPixel / 8;
-	linesToRead = BUFFER_SIZE / bytesPerLine;
+        bytesPerLine = rect.r.w * myFormat.bitsPerPixel / 8;
+        linesToRead = BUFFER_SIZE / bytesPerLine;
 
-	while (rect.r.h > 0) {
-	  if (linesToRead > rect.r.h)
-	    linesToRead = rect.r.h;
+        while (rect.r.h > 0) {
+          if (linesToRead > rect.r.h)
+            linesToRead = rect.r.h;
 
-	  if (!ReadFromRFBServer(buffer,bytesPerLine * linesToRead))
-	    return False;
-	  CopyDataToScreen(buffer, rect.r.x, rect.r.y, rect.r.w,
-			   linesToRead);
+          if (!ReadFromRFBServer(buffer,bytesPerLine * linesToRead))
+            return False;
+          CopyDataToScreen(buffer, rect.r.x, rect.r.y, rect.r.w,
+                           linesToRead);
 
-	  rect.r.h -= linesToRead;
-	  rect.r.y += linesToRead;
+          rect.r.h -= linesToRead;
+          rect.r.y += linesToRead;
 
-	}
-	break;
+        }
+        break;
 
       case rfbEncodingCopyRect:
       {
-	rfbCopyRect cr;
+        rfbCopyRect cr;
           char *buffer;
 
-	if (!ReadFromRFBServer((char *)&cr, sz_rfbCopyRect))
-	  return False;
+        if (!ReadFromRFBServer((char *)&cr, sz_rfbCopyRect))
+          return False;
 
           if (!BufferWritten()) {
             /* Ignore attempts to do copy-rect when we have nothing to
@@ -613,65 +613,65 @@ HandleRFBServerMessage()
             break;
         }
 
- 	cr.srcX = Swap16IfLE(cr.srcX);
-	cr.srcY = Swap16IfLE(cr.srcY);
+        cr.srcX = Swap16IfLE(cr.srcX);
+        cr.srcY = Swap16IfLE(cr.srcY);
 
-	/* If RichCursor encoding is used, we should extend our
-	   "cursor lock area" (previously set to destination
-	   rectangle) to the source rectangle as well. */
-	SoftCursorLockArea(cr.srcX, cr.srcY, rect.r.w, rect.r.h);
+        /* If RichCursor encoding is used, we should extend our
+           "cursor lock area" (previously set to destination
+           rectangle) to the source rectangle as well. */
+        SoftCursorLockArea(cr.srcX, cr.srcY, rect.r.w, rect.r.h);
 
         buffer = CopyScreenToData(cr.srcX, cr.srcY, rect.r.w, rect.r.h);
         CopyDataToScreen(buffer, rect.r.x, rect.r.y, rect.r.w, rect.r.h);
         free(buffer);
 
-	break;
+        break;
       }
 
       case rfbEncodingRRE:
       {
-	if (!HandleRRE32(rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-	    return False;
-	break;
+        if (!HandleRRE32(rect.r.x,rect.r.y,rect.r.w,rect.r.h))
+            return False;
+        break;
       }
 
       case rfbEncodingCoRRE:
       {
-	if (!HandleCoRRE32(rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-	  return False;
-	break;
+        if (!HandleCoRRE32(rect.r.x,rect.r.y,rect.r.w,rect.r.h))
+          return False;
+        break;
       }
 
       case rfbEncodingHextile:
       {
-	if (!HandleHextile32(rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-	    return False;
-	break;
+        if (!HandleHextile32(rect.r.x,rect.r.y,rect.r.w,rect.r.h))
+            return False;
+        break;
       }
 
       case rfbEncodingZlib:
       {
-	if (!HandleZlib32(rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-	    return False;
-	break;
+        if (!HandleZlib32(rect.r.x,rect.r.y,rect.r.w,rect.r.h))
+            return False;
+        break;
      }
 
       case rfbEncodingTight:
       {
-	if (!HandleTight32(rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-	    return False;
-	break;
+        if (!HandleTight32(rect.r.x,rect.r.y,rect.r.w,rect.r.h))
+            return False;
+        break;
       }
 
       case rfbEncodingZRLE:
         if (!zrleDecode(rect.r.x,rect.r.y,rect.r.w,rect.r.h))
           return False;
-	break;
+        break;
 
       default:
-	fprintf(stderr,"Unknown rect encoding %d\n",
-		(int)rect.encoding);
-	return False;
+        fprintf(stderr,"Unknown rect encoding %d\n",
+                (int)rect.encoding);
+        return False;
       }
 
       /* Now we may discard "soft cursor locks". */
@@ -702,7 +702,7 @@ HandleRFBServerMessage()
   case rfbServerCutText:
   {
     if (!ReadFromRFBServer(((char *)&msg) + 1,
-			   sz_rfbServerCutTextMsg - 1))
+                           sz_rfbServerCutTextMsg - 1))
       return False;
 
     msg.sct.length = Swap32IfLE(msg.sct.length);
@@ -734,7 +734,7 @@ HandleRFBServerMessage()
 #define GET_PIXEL8(pix, ptr) ((pix) = *(ptr)++)
 
 #define GET_PIXEL16(pix, ptr) (((CARD8*)&(pix))[0] = *(ptr)++, \
-			       ((CARD8*)&(pix))[1] = *(ptr)++)
+                               ((CARD8*)&(pix))[1] = *(ptr)++)
 
 #ifdef __APPLE__
 /* Apple compilation appears to be broken.*/
@@ -747,9 +747,9 @@ static inline void GET_PIXEL32(void *pix, CARD8 *ptr)
 }
 #endif
 #define GET_PIXEL32(pix, ptr) (((CARD8*)&(pix))[0] = *(ptr)++, \
-			       ((CARD8*)&(pix))[1] = *(ptr)++, \
-			       ((CARD8*)&(pix))[2] = *(ptr)++, \
-			       ((CARD8*)&(pix))[3] = *(ptr)++)
+                               ((CARD8*)&(pix))[1] = *(ptr)++, \
+                               ((CARD8*)&(pix))[2] = *(ptr)++, \
+                               ((CARD8*)&(pix))[3] = *(ptr)++)
 
 /* CONCAT2 concatenates its two arguments.  CONCAT2E does the same but also
    expands its arguments if they are macros */
@@ -777,19 +777,19 @@ PrintPixelFormat(format)
   if (format->bitsPerPixel == 1) {
     fprintf(stderr,"  Single bit per pixel.\n");
     fprintf(stderr,
-	    "  %s significant bit in each byte is leftmost on the screen.\n",
-	    (format->bigEndian ? "Most" : "Least"));
+            "  %s significant bit in each byte is leftmost on the screen.\n",
+            (format->bigEndian ? "Most" : "Least"));
   } else {
     fprintf(stderr,"  %d bits per pixel.\n",format->bitsPerPixel);
     if (format->bitsPerPixel != 8) {
       fprintf(stderr,"  %s significant byte first in each pixel.\n",
-	      (format->bigEndian ? "Most" : "Least"));
+              (format->bigEndian ? "Most" : "Least"));
     }
     if (format->trueColour) {
       fprintf(stderr,"  True colour: max red %d green %d blue %d",
-	      format->redMax, format->greenMax, format->blueMax);
+              format->redMax, format->greenMax, format->blueMax);
       fprintf(stderr,", shift red %d green %d blue %d\n",
-	      format->redShift, format->greenShift, format->blueShift);
+              format->redShift, format->greenShift, format->blueShift);
     } else {
       fprintf(stderr,"  Colour map (not true colour).\n");
     }
@@ -811,7 +811,7 @@ ReadCompactLen (void)
     len |= ((int)b & 0x7F) << 7;
     if (b & 0x80) {
       if (!ReadFromRFBServer((char *)&b, 1))
-	return -1;
+        return -1;
       len |= ((int)b & 0xFF) << 14;
     }
   }
@@ -863,7 +863,7 @@ JpegTermSource(j_decompress_ptr cinfo)
 
 static void
 JpegSetSrcManager(j_decompress_ptr cinfo, CARD8 *compressedData,
-		  int compressedLen)
+                  int compressedLen)
 {
   jpegBufferPtr = (JOCTET *)compressedData;
   jpegBufferLen = (size_t)compressedLen;
