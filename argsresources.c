@@ -124,7 +124,7 @@ usage(void)
 {
   int i;
   fprintf(stderr,
-          "TightVNC snapshot version " VNC_SNAPSHOT_VERSION " (based on TightVNC 1.2.8 and RealVNC 3.3.7)\n"
+          "vncsnapshot-png version " VNC_SNAPSHOT_VERSION " (based on TightVNC 1.2.8, RealVNC 3.3.7, vncsnapshot 1.2a)\n"
           "\n"
           "Usage: %s [<OPTIONS>] [<HOST>]:<DISPLAY#> filename\n"
           "       %s [<OPTIONS>] -listen [<DISPLAY#>] filename\n"
