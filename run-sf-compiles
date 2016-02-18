@@ -1,6 +1,6 @@
 #!/bin/sh
 
-RELEASE=1.2a
+RELEASE=$(awk '/#define VNC_SNAPSHOT_VERSION/ { gsub(/"/,""); print $3; }' version.h)
 
 # x86-openbsd1  OpenBSD 3.4
 # x86-solaris1  Solaris 9

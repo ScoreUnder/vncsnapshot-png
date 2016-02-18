@@ -1,1 +1,1 @@
-#define VNC_SNAPSHOT_VERSION "1.2a"
+#define VNC_SNAPSHOT_VERSION "1.3"
