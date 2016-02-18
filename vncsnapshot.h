@@ -71,7 +71,6 @@ typedef struct {
   char ignoreBlank; /* ignore blank screens */
   char enableJPEG;
 
-  int  saveQuality;
   char *outputFilename;
 
   int quiet;

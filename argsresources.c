@@ -53,7 +53,6 @@ Options cmdLineOptions[] = {
   {"-nocursor",      setFlag,   &appData.useRemoteCursor, 0, ": do not include remote cursor"},
   {"-nojpeg",        setFlag,   &appData.enableJPEG, 0, ": do not use JPEG transmission encoding"},
   {"-passwd",        setString, &appData.passwordFile, 0, " <PASSWD-FILENAME>: read password from file"},
-  {"-quality",       setNumber, &appData.saveQuality, 0, " <JPEG-QUALITY-VALUE>: output file quality level, percent (0..100)"},
   {"-quiet",         setFlag,   &appData.quiet, 1, ": do not output messages"},
   {"-rect",          setString, &rect, 0, " wxh+x+y: define rectangle to capture (default entire screen)"},
   {"-verbose",       setFlag,   &appData.quiet, 0, ": output messages"},
@@ -90,7 +89,6 @@ AppData appData = {
     -1,     /* useRemoteCursor */
     -1,     /* ignoreBlank */
     -1,     /* enableJPEG */
-    100,    /* saveQuality */
     NULL,   /* outputFilename */
     0,      /* quiet */
     0, 0,   /* rectXNegative, rectYNegative */
