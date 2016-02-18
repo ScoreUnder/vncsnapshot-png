@@ -67,7 +67,7 @@ static uint32_t buffer[BUFFER_SIZE];
 rdr::ZlibInStream zis;
 extern rdr::FdInStream* fis;
 
-Bool zrleDecode(int x, int y, int w, int h)
+bool zrleDecode(int x, int y, int w, int h)
 {
   try {
     switch (myFormat.bitsPerPixel) {
@@ -109,8 +109,8 @@ Bool zrleDecode(int x, int y, int w, int h)
 
   } catch (rdr::Exception& e) {
     fprintf(stderr,"ZRLE decoder exception: %s\n",e.str());
-    return False;
+    return false;
   }
 
-  return True;
+  return true;
 }

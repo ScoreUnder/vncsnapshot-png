@@ -53,9 +53,9 @@ extern "C" {
 int rfbsock;
 rdr::FdInStream* fis;
 rdr::FdOutStream* fos;
-Bool sameMachine = False;
+bool sameMachine = false;
 
-/*static Bool rfbsockReady = False;*/
+/*static bool rfbsockReady = false;*/
 
 /*
  * InitializeSockets is called on startup. It will do any required one-time setup
@@ -65,7 +65,7 @@ Bool sameMachine = False;
  *
  * On Windows, it initializes Windows Sockets.
  */
-extern "C" Bool
+extern "C" bool
 InitializeSockets(void)
 {
 #ifdef WIN32
@@ -78,7 +78,7 @@ InitializeSockets(void)
     err = WSAStartup( wVersionRequested, &wsaData );
     if ( err != 0 ) {
         fprintf(stderr, "Cannot initialize Windows Sockets\n");
-        return False;
+        return false;
     }
 
 /* Confirm that the WinSock DLL supports 2.2.*/
@@ -91,31 +91,31 @@ InitializeSockets(void)
          HIBYTE( wsaData.wVersion ) != 2 ) {
         fprintf(stderr, "Cannot get proper version of Windows Sockets\n");
         WSACleanup( );
-        return False; 
+        return false; 
     }
 
 /* The WinSock DLL is acceptable. Proceed. */
 #endif
-    return True;
+    return true;
 }
 
 /*
  * ConnectToRFBServer.
  */
 
-Bool ConnectToRFBServer(const char *hostname, uint16_t port)
+bool ConnectToRFBServer(const char *hostname, uint16_t port)
 {
   int sock = ConnectToTcpAddr(hostname, port);
 
   if (sock < 0) {
     fprintf(stderr,"Unable to connect to VNC server\n");
-    return False;
+    return false;
   }
 
   return SetRFBSock(sock);
 }
 
-Bool SetRFBSock(int sock)
+bool SetRFBSock(int sock)
 {
   try {
     rfbsock = sock;
@@ -130,22 +130,22 @@ Bool SetRFBSock(int sock)
 
     sameMachine = (peeraddr.sin_addr.s_addr == myaddr.sin_addr.s_addr);
 
-    return True;
+    return true;
   } catch (rdr::Exception& e) {
     fprintf(stderr,"initialiseInStream: %s\n",e.str());
   }
-  return False;
+  return false;
 }
 
-Bool ReadFromRFBServer(uint8_t *out, size_t n)
+bool ReadFromRFBServer(uint8_t *out, size_t n)
 {
   try {
     fis->readBytes(out, n);
-    return True;
+    return true;
   } catch (rdr::Exception& e) {
     fprintf(stderr,"ReadFromRFBServer: %s\n",e.str());
   }
-  return False;
+  return false;
 }
 
 
@@ -153,16 +153,16 @@ Bool ReadFromRFBServer(uint8_t *out, size_t n)
  * Write an exact number of bytes, and don't return until you've sent them.
  */
 
-Bool WriteToRFBServer(uint8_t *buf, size_t n)
+bool WriteToRFBServer(uint8_t *buf, size_t n)
 {
   try {
     fos->writeBytes(buf, n);
     fos->flush();
-    return True;
+    return true;
   } catch (rdr::Exception& e) {
     fprintf(stderr,"WriteExact: %s\n",e.str());
   }
-  return False;
+  return false;
 }
 
 
@@ -331,26 +331,26 @@ int AcceptTcpConnection(int listenSock)
  * StringToIPAddr - convert a host string to an IP address.
  */
 
-Bool StringToIPAddr(const char *str, unsigned int *addr)
+bool StringToIPAddr(const char *str, unsigned int *addr)
 {
   struct hostent *hp;
 
   if (strcmp(str,"") == 0) {
     *addr = 0; /* local */
-    return True;
+    return true;
   }
 
   *addr = inet_addr(str);
 
   if (*addr != (unsigned int)-1)
-    return True;
+    return true;
 
   hp = gethostbyname(str);
 
   if (hp) {
     *addr = *(unsigned int *)hp->h_addr;
-    return True;
+    return true;
   }
 
-  return False;
+  return false;
 }

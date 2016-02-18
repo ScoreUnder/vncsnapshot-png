@@ -25,6 +25,7 @@
 #ifndef WIN32
 #include <unistd.h>
 #endif
+#include <stdbool.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "vncsnapshot.h"
@@ -40,11 +41,11 @@
 #define S_ISLNK(x) (0)
 #endif
 
-/* True if there was -tunnel or -via option in the command line. */
-Bool tunnelSpecified = False;
+/* true if there was -tunnel or -via option in the command line. */
+bool tunnelSpecified = false;
 
-/* True if it was -tunnel, not -via option. */
-static Bool tunnelOption = False;
+/* true if it was -tunnel, not -via option. */
+static bool tunnelOption = false;
 
 /* "Hostname:display" pair in the command line will be substituted
    by this fake argument when tunneling is used. */
@@ -58,13 +59,13 @@ static void processViaArgs(char **gatewayHost, char **remoteHost,
                            uint16_t *remotePort, uint16_t localPort,
                            int *pargc, char **argv, int tunnelArgIndex);
 static char *getCmdPattern(void);
-static Bool fillCmdPattern(char *result, char *pattern,
+static bool fillCmdPattern(char *result, char *pattern,
                            char *gatewayHost, char *remoteHost,
                            char *remotePort, char *localPort);
-static Bool runCommand(char *cmd);
+static bool runCommand(char *cmd);
 
 
-Bool
+bool
 createTunnel(int *pargc, char **argv, int tunnelArgIndex)
 {
   char *pattern;
@@ -75,17 +76,17 @@ createTunnel(int *pargc, char **argv, int tunnelArgIndex)
   char *gatewayHost = "";
   char *remoteHost = "localhost";
 
-  tunnelSpecified = True;
+  tunnelSpecified = true;
   if (strcmp(argv[tunnelArgIndex], "-tunnel") == 0)
-    tunnelOption = True;
+    tunnelOption = true;
 
   pattern = getCmdPattern();
   if (!pattern)
-    return False;
+    return false;
 
   localPort = FindFreeTcpPort();
   if (localPort == 0)
-    return False;
+    return false;
 
   if (tunnelOption) {
     processTunnelArgs(&remoteHost, &remotePort, localPort,
@@ -100,12 +101,12 @@ createTunnel(int *pargc, char **argv, int tunnelArgIndex)
 
   if (!fillCmdPattern(cmd, pattern, gatewayHost, remoteHost,
                       remotePortStr, localPortStr))
-    return False;
+    return false;
 
   if (!runCommand(cmd))
-    return False;
+    return false;
 
-  return True;
+  return true;
 }
 
 static void
@@ -203,13 +204,13 @@ getCmdPattern(void)
 
 /* Note: in fillCmdPattern() result points to a 1024-byte buffer */
 
-static Bool
+static bool
 fillCmdPattern(char *result, char *pattern,
                char *gatewayHost, char *remoteHost,
                char *remotePort, char *localPort)
 {
   size_t i, j;
-  Bool H_found = False, G_found = False, R_found = False, L_found = False;
+  bool H_found = false, G_found = false, R_found = false, L_found = false;
 
   for (i=0, j=0; pattern[i] && j<1023; i++, j++) {
     if (pattern[i] == '%') {
@@ -217,22 +218,22 @@ fillCmdPattern(char *result, char *pattern,
       case 'H':
         strncpy(&result[j], remoteHost, 1024 - j);
         j += strlen(remoteHost) - 1;
-        H_found = True;
+        H_found = true;
         continue;
       case 'G':
         strncpy(&result[j], gatewayHost, 1024 - j);
         j += strlen(gatewayHost) - 1;
-        G_found = True;
+        G_found = true;
         continue;
       case 'R':
         strncpy(&result[j], remotePort, 1024 - j);
         j += strlen(remotePort) - 1;
-        R_found = True;
+        R_found = true;
         continue;
       case 'L':
         strncpy(&result[j], localPort, 1024 - j);
         j += strlen(localPort) - 1;
-        L_found = True;
+        L_found = true;
         continue;
       case '\0':
         i--;
@@ -244,32 +245,32 @@ fillCmdPattern(char *result, char *pattern,
 
   if (pattern[i]) {
     fprintf(stderr, "%s: Tunneling command is too long.\n", programName);
-    return False;
+    return false;
   }
 
   if (!H_found || !R_found || !L_found) {
     fprintf(stderr, "%s: %%H, %%R or %%L absent in tunneling command.\n",
             programName);
-    return False;
+    return false;
   }
   if (!tunnelOption && !G_found) {
     fprintf(stderr, "%s: %%G pattern absent in tunneling command.\n",
             programName);
-    return False;
+    return false;
   }
 
   result[j] = '\0';
-  return True;
+  return true;
 }
 
-static Bool
+static bool
 runCommand(char *cmd)
 {
   if (system(cmd) != 0) {
     fprintf(stderr, "%s: Tunneling command failed: %s.\n",
             programName, cmd);
-    return False;
+    return false;
   }
-  return True;
+  return true;
 }
 

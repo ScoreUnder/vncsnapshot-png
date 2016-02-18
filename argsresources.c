@@ -21,6 +21,7 @@
  * argsresources.c - deal with command-line args and resources.
  */
 
+#include <stdbool.h>
 #include <stdint.h>
 #include "vncsnapshot.h"
 #include "version.h"
@@ -140,7 +141,7 @@ usage(void)
         if (cmdLineOptions[i].optiondesc) {
             fprintf(stderr, "%s", cmdLineOptions[i].optiondesc);
         }
-        if (cmdLineOptions[i].set == setFlag && *(Bool *)cmdLineOptions[i].arg) {
+        if (cmdLineOptions[i].set == setFlag && *(bool *)cmdLineOptions[i].arg) {
             fprintf(stderr, " (default)");
         } else if (cmdLineOptions[i].set == setNumber) {
             fprintf(stderr, " (default %d)", *(int *)cmdLineOptions[i].arg);
@@ -332,6 +333,6 @@ static int setString(int *argc, char ***argv, void *arg, int value)
 static int setFlag(int *argc, char ***argv, void *arg, int value)
 {
     (void) argc, (void) argv;
-    *((Bool *)arg) = (Bool) value;
+    *((bool *)arg) = (bool) value;
     return 1;
 }

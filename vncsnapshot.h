@@ -23,6 +23,7 @@
  * vncviewer.h
  */
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -53,15 +54,6 @@
   (DEFAULT_SSH_CMD " -f -L %L:%H:%R %G sleep 20")
 
 
-typedef char Bool;
-#ifndef True
-#define True 1
-#endif
-#ifndef False
-#define False 0
-#endif
-
-
 /* argsresources.c */
 
 typedef struct {
@@ -70,14 +62,14 @@ typedef struct {
 
   char *passwordFile;
 
-  Bool debug;
+  char debug;
 
 
   int32_t compressLevel;
   int32_t qualityLevel;
-  Bool useRemoteCursor;
-  Bool ignoreBlank; /* ignore blank screens */
-  Bool enableJPEG;
+  char useRemoteCursor;
+  char ignoreBlank; /* ignore blank screens */
+  char enableJPEG;
 
   int  saveQuality;
   char *outputFilename;
@@ -101,7 +93,7 @@ extern char *fallback_resources[];
 extern char vncServerHost[];
 extern char *vncServerName;
 extern uint16_t vncServerPort;
-extern Bool listenSpecified;
+extern bool listenSpecified;
 extern uint16_t listenPort, flashPort;
 
 
@@ -126,8 +118,8 @@ extern uint32_t BGR233ToPixel[];
 
 /* cursor.c */
 
-extern Bool HandleCursorShape(int xhot, int yhot, int width, int height, uint32_t enc);
-extern Bool HandleCursorPos(int x, int y);
+extern bool HandleCursorShape(int xhot, int yhot, int width, int height, uint32_t enc);
+extern bool HandleCursorPos(int x, int y);
 extern void SoftCursorLockArea(int x, int y, int w, int h);
 extern void SoftCursorUnlockScreen(void);
 extern void SoftCursorMove(int x, int y);
@@ -138,62 +130,62 @@ extern void listenForIncomingConnections();
 
 /* rfbproto.c */
 
-extern Bool canUseCoRRE;
-extern Bool canUseHextile;
+extern bool canUseCoRRE;
+extern bool canUseHextile;
 extern char *desktopName;
 extern rfbPixelFormat myFormat;
 extern rfbServerInitMsg si;
 extern uint8_t *serverCutText;
-extern Bool newServerCutText;
+extern bool newServerCutText;
 
-extern Bool ConnectToRFBServer(const char *hostname, uint16_t port);
-extern Bool InitialiseRFBConnection();
-extern Bool SendSetPixelFormat();
-extern Bool SendSetEncodings();
-extern Bool SendIncrementalFramebufferUpdateRequest();
-extern Bool SendFramebufferUpdateRequest(uint16_t x, uint16_t y, uint16_t w, uint16_t h,
-                                         Bool incremental);
-extern Bool SendPointerEvent(int x, int y, int buttonMask);
-extern Bool SendKeyEvent(uint32_t key, Bool down);
-extern Bool SendClientCutText(char *str, int len);
-extern Bool HandleRFBServerMessage();
+extern bool ConnectToRFBServer(const char *hostname, uint16_t port);
+extern bool InitialiseRFBConnection();
+extern bool SendSetPixelFormat();
+extern bool SendSetEncodings();
+extern bool SendIncrementalFramebufferUpdateRequest();
+extern bool SendFramebufferUpdateRequest(uint16_t x, uint16_t y, uint16_t w, uint16_t h,
+                                         bool incremental);
+extern bool SendPointerEvent(int x, int y, int buttonMask);
+extern bool SendKeyEvent(uint32_t key, bool down);
+extern bool SendClientCutText(char *str, int len);
+extern bool HandleRFBServerMessage();
 
 extern void PrintPixelFormat(rfbPixelFormat *format);
 
 /* sockets.cxx */
 
-extern Bool sameMachine;
+extern bool sameMachine;
 extern int rfbsock;
 
-extern Bool InitializeSockets(void);
-extern Bool ConnectToRFBServer(const char *hostname, uint16_t port);
-extern Bool SetRFBSock(int sock);
+extern bool InitializeSockets(void);
+extern bool ConnectToRFBServer(const char *hostname, uint16_t port);
+extern bool SetRFBSock(int sock);
 extern void StartTiming();
 extern void StopTiming();
 extern int KbitsPerSecond();
 extern int TimeWaitedIn100us();
-extern Bool ReadFromRFBServer(uint8_t *out, size_t n);
-extern Bool WriteToRFBServer(uint8_t *buf, size_t n);
+extern bool ReadFromRFBServer(uint8_t *out, size_t n);
+extern bool WriteToRFBServer(uint8_t *buf, size_t n);
 extern int ConnectToTcpAddr(const char* hostname, uint16_t port);
 extern uint16_t FindFreeTcpPort();
 extern int ListenAtTcpPort(uint16_t port);
 extern int AcceptTcpConnection(int listenSock);
 
-extern Bool StringToIPAddr(const char *str, unsigned int *addr);
+extern bool StringToIPAddr(const char *str, unsigned int *addr);
 
 
 /* tunnel.c */
 
-extern Bool tunnelSpecified;
+extern bool tunnelSpecified;
 
-extern Bool createTunnel(int *argc, char **argv, int tunnelArgIndex);
+extern bool createTunnel(int *argc, char **argv, int tunnelArgIndex);
 
 /* vncviewer.c */
 
 extern char *programName;
 
 /* zrle.cxx */
-extern Bool zrleDecode(int x, int y, int w, int h);
+extern bool zrleDecode(int x, int y, int w, int h);
 
 /* getpass.c (win32) */
 #ifdef WIN32

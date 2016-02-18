@@ -27,6 +27,7 @@
  * encoded rectangle with BPP bits per pixel.
  */
 
+#include <stdbool.h>
 #define HandleHextileBPP CONCAT2E(HandleHextile,BPP)
 #ifndef CARDBPP
 // XXX CARDBPP redefined
@@ -34,7 +35,7 @@
 #endif
 #define GET_PIXEL CONCAT2E(GET_PIXEL,BPP)
 
-static Bool
+static bool
 HandleHextileBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
 {
   CARDBPP bg, fg;
@@ -51,11 +52,11 @@ HandleHextileBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
 
       uint8_t subencoding;
       if (!ReadFromRFBServer((uint8_t *)&subencoding, 1))
-        return False;
+        return false;
 
       if (subencoding & rfbHextileRaw) {
         if (!ReadFromRFBServer(buffer, (size_t)(w * h * (BPP / 8))))
-          return False;
+          return false;
 
         CopyDataToScreen(buffer, x, y, w, h);
         continue;
@@ -63,13 +64,13 @@ HandleHextileBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
 
       if (subencoding & rfbHextileBackgroundSpecified)
         if (!ReadFromRFBServer((uint8_t *)&bg, sizeof(bg)))
-          return False;
+          return false;
 
       FillBufferRectangle(x, y, w, h, bg);
 
       if (subencoding & rfbHextileForegroundSpecified)
         if (!ReadFromRFBServer((uint8_t *)&fg, sizeof(fg)))
-          return False;
+          return false;
 
       if (!(subencoding & rfbHextileAnySubrects)) {
         continue;
@@ -77,13 +78,13 @@ HandleHextileBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
 
       uint8_t nSubrects;
       if (!ReadFromRFBServer((uint8_t *)&nSubrects, 1))
-        return False;
+        return false;
 
       uint8_t *ptr = buffer;
 
       if (subencoding & rfbHextileSubrectsColoured) {
         if (!ReadFromRFBServer(buffer, (size_t)nSubrects * (2 + (BPP / 8))))
-          return False;
+          return false;
 
         for (uint_fast8_t i = 0; i < nSubrects; i++) {
           GET_PIXEL(fg, ptr);
@@ -98,7 +99,7 @@ HandleHextileBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
 
       } else {
         if (!ReadFromRFBServer(buffer, (size_t)nSubrects * 2))
-          return False;
+          return false;
 
 
         for (uint_fast8_t i = 0; i < nSubrects; i++) {
@@ -114,5 +115,5 @@ HandleHextileBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
     }
   }
 
-  return True;
+  return true;
 }

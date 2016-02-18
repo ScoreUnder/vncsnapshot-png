@@ -27,29 +27,30 @@
  * encoded rectangle with BPP bits per pixel.
  */
 
+#include <stdbool.h>
 #define HandleCoRREBPP CONCAT2E(HandleCoRRE,BPP)
 #ifndef CARDBPP
 // XXX CARDBPP is defined elsewhere
 #define CARDBPP CONCAT2E(CARD,BPP)
 #endif
 
-static Bool
+static bool
 HandleCoRREBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
 {
     rfbRREHeader hdr;
     if (!ReadFromRFBServer((uint8_t *)&hdr, sz_rfbRREHeader))
-        return False;
+        return false;
 
     hdr.nSubrects = Swap32IfLE(hdr.nSubrects);
 
     CARDBPP pix;
     if (!ReadFromRFBServer((uint8_t *)&pix, sizeof(pix)))
-        return False;
+        return false;
 
     FillBufferRectangle(rx, ry, rw, rh, pix);
 
     if (!ReadFromRFBServer(buffer, hdr.nSubrects * (4 + (BPP / 8))))
-        return False;
+        return false;
 
     uint8_t *ptr = buffer;
 
@@ -64,5 +65,5 @@ HandleCoRREBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
         FillBufferRectangle(rx + x, ry + y, w, h, pix);
     }
 
-    return True;
+    return true;
 }

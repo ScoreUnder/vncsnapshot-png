@@ -52,6 +52,8 @@
  *
  *****************************************************************************/
 
+#include <stdbool.h>
+
 /*-----------------------------------------------------------------------------
  * Structure used to specify a rectangle.  This structure is a multiple of 4
  * bytes so that it can be interspersed with 32-bit pixel data without
@@ -78,7 +80,7 @@ typedef struct {
 
     uint8_t depth;        /* 8 to 32 */
 
-    uint8_t bigEndian;        /* True if multi-byte pixels are interpreted
+    uint8_t bigEndian;        /* true if multi-byte pixels are interpreted
                    as big endian, or if single-bit-per-pixel
                    has most significant bit of the byte
                    corresponding to first (leftmost) pixel. Of

@@ -27,6 +27,7 @@
  *
  */
 
+#include <stdbool.h>
 #define TIGHT_MIN_TO_COMPRESS 12
 
 #define CARDBPP CONCAT2E(CONCAT2E(uint,BPP),_t)
@@ -79,11 +80,11 @@ static void FilterCopyBPP (size_t numRows, CARDBPP *destBuffer);
 static void FilterPaletteBPP (size_t numRows, CARDBPP *destBuffer);
 static void FilterGradientBPP (size_t numRows, CARDBPP *destBuffer);
 
-static Bool DecompressJpegRectBPP(uint32_t x, uint32_t y, uint32_t w, uint32_t h);
+static bool DecompressJpegRectBPP(uint32_t x, uint32_t y, uint32_t w, uint32_t h);
 
 /* Definitions */
 
-static Bool
+static bool
 HandleTightBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
 {
   CARDBPP fill_colour;
@@ -96,7 +97,7 @@ HandleTightBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
   uint_fast8_t bitsPixel;
 
   if (!ReadFromRFBServer((uint8_t *)&comp_ctl, 1))
-    return False;
+    return false;
 
   /* Flush zlib streams if we are told by the server to do so. */
   for (stream_id = 0; stream_id < 4; stream_id++) {
@@ -104,7 +105,7 @@ HandleTightBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
       if (inflateEnd (&zlibStream[stream_id]) != Z_OK &&
           zlibStream[stream_id].msg != NULL)
         fprintf(stderr, "inflateEnd: %s\n", zlibStream[stream_id].msg);
-      zlibStreamActive[stream_id] = False;
+      zlibStreamActive[stream_id] = false;
     }
     comp_ctl >>= 1;
   }
@@ -115,25 +116,25 @@ HandleTightBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
     if (myFormat.depth == 24 && myFormat.redMax == 0xFF &&
         myFormat.greenMax == 0xFF && myFormat.blueMax == 0xFF) {
       if (!ReadFromRFBServer(buffer, 3))
-        return False;
+        return false;
       fill_colour = RGB24_TO_PIXEL32(buffer[0], buffer[1], buffer[2]);
     } else {
       if (!ReadFromRFBServer((uint8_t*)&fill_colour, sizeof(fill_colour)))
-        return False;
+        return false;
     }
 #else
     if (!ReadFromRFBServer((uint8_t*)&fill_colour, sizeof(fill_colour)))
-        return False;
+        return false;
 #endif
 
     FillBufferRectangle(rx, ry, rw, rh, fill_colour);
-    return True;
+    return true;
   }
 
 #if BPP == 8
   if (comp_ctl == rfbTightJpeg) {
     fprintf(stderr, "Tight encoding: JPEG is not supported in 8 bpp mode.\n");
-    return False;
+    return false;
   }
 #else
   if (comp_ctl == rfbTightJpeg) {
@@ -144,7 +145,7 @@ HandleTightBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
   /* Quit on unsupported subencoding value. */
   if (comp_ctl > rfbTightMaxSubencoding) {
     fprintf(stderr, "Tight encoding: bad subencoding value received.\n");
-    return False;
+    return false;
   }
 
   /*
@@ -155,7 +156,7 @@ HandleTightBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
   /* First, we should identify a filter to use. */
   if ((comp_ctl & rfbTightExplicitFilter) != 0) {
     if (!ReadFromRFBServer((uint8_t*)&filter_id, 1))
-      return False;
+      return false;
 
     switch (filter_id) {
     case rfbTightFilterCopy:
@@ -172,7 +173,7 @@ HandleTightBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
       break;
     default:
       fprintf(stderr, "Tight encoding: unknown filter code received.\n");
-      return False;
+      return false;
     }
   } else {
     filterFn = FilterCopyBPP;
@@ -180,27 +181,27 @@ HandleTightBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
   }
   if (bitsPixel == 0) {
     fprintf(stderr, "Tight encoding: error receiving palette.\n");
-    return False;
+    return false;
   }
 
   /* Determine if the data should be decompressed or just copied. */
   size_t rowSize = (size_t) (rw * bitsPixel + 7) / 8;
   if ((size_t)rh * rowSize < TIGHT_MIN_TO_COMPRESS) {
     if (!ReadFromRFBServer((uint8_t*)buffer, (size_t)rh * rowSize))
-      return False;
+      return false;
 
     buffer2 = &buffer[TIGHT_MIN_TO_COMPRESS * 4];
     filterFn(rh, (CARDBPP *)buffer2);
     CopyDataToScreen(buffer2, rx, ry, rw, rh);
 
-    return True;
+    return true;
   }
 
   /* Read the length (1..3 bytes) of compressed data following. */
   compressedLen = (int)ReadCompactLen();
   if (compressedLen <= 0) {
     fprintf(stderr, "Incorrect data received from the server.\n");
-    return False;
+    return false;
   }
 
   /* Now let's initialize compression stream if needed. */
@@ -214,9 +215,9 @@ HandleTightBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
     if (err != Z_OK) {
       if (zs->msg != NULL)
         fprintf(stderr, "InflateInit error: %s.\n", zs->msg);
-      return False;
+      return false;
     }
-    zlibStreamActive[stream_id] = True;
+    zlibStreamActive[stream_id] = true;
   }
 
   /* Read, decode and draw actual pixel data in a loop. */
@@ -226,7 +227,7 @@ HandleTightBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
   if (rowSize > bufferSize) {
     /* Should be impossible when BUFFER_SIZE >= 16384 */
     fprintf(stderr, "Internal error: incorrect buffer size.\n");
-    return False;
+    return false;
   }
 
   size_t rowsProcessed = 0;
@@ -240,7 +241,7 @@ HandleTightBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
       portionLen = (size_t) compressedLen;
 
     if (!ReadFromRFBServer((uint8_t*)zlib_buffer, portionLen))
-      return False;
+      return false;
 
     assert((size_t)compressedLen > portionLen);
     compressedLen -= (int) portionLen;
@@ -261,7 +262,7 @@ HandleTightBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
         } else {
           fprintf(stderr, "Inflate error: %d.\n", err);
         }
-        return False;
+        return false;
       }
 
       size_t numRows = (bufferSize - zs->avail_out) / rowSize;
@@ -284,10 +285,10 @@ HandleTightBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
 
   if (rowsProcessed != rh) {
     fprintf(stderr, "Incorrect number of scan lines after decompression.\n");
-    return False;
+    return false;
   }
 
-  return True;
+  return true;
 }
 
 /*----------------------------------------------------------------------------
@@ -298,7 +299,7 @@ HandleTightBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
 
 /*
    The following variables are defined in rfbproto.c:
-     static Bool cutZeros;
+     static bool cutZeros;
      static uint32_t rectWidth, rectColors;
      static uint8_t tightPalette[256*4];
      static uint8_t tightPrevRow[2048*3*sizeof(uint16_t)];
@@ -313,10 +314,10 @@ InitFilterCopyBPP (uint32_t rw, uint32_t rh)
 #if BPP == 32
   if (myFormat.depth == 24 && myFormat.redMax == 0xFF &&
       myFormat.greenMax == 0xFF && myFormat.blueMax == 0xFF) {
-    cutZeros = True;
+    cutZeros = true;
     return 24;
   } else {
-    cutZeros = False;
+    cutZeros = false;
   }
 #endif
 
@@ -526,13 +527,13 @@ FilterPaletteBPP (size_t numRows, CARDBPP *dst)
 
 /*
    The following variables are defined in rfbproto.c:
-     static Bool jpegError;
+     static bool jpegError;
      static struct jpeg_source_mgr jpegSrcManager;
      static JOCTET *jpegBufferPtr;
      static size_t *jpegBufferLen;
 */
 
-static Bool
+static bool
 DecompressJpegRectBPP(uint32_t x, uint32_t y, uint32_t w, uint32_t h)
 {
   struct jpeg_decompress_struct cinfo;
@@ -545,18 +546,18 @@ DecompressJpegRectBPP(uint32_t x, uint32_t y, uint32_t w, uint32_t h)
   compressedLen = (int)ReadCompactLen();
   if (compressedLen <= 0) {
     fprintf(stderr, "Incorrect data received from the server.\n");
-    return False;
+    return false;
   }
 
   compressedData = malloc((size_t)compressedLen);
   if (compressedData == NULL) {
     fprintf(stderr, "Memory allocation error.\n");
-    return False;
+    return false;
   }
 
   if (!ReadFromRFBServer((uint8_t*)compressedData, (size_t)compressedLen)) {
     free(compressedData);
-    return False;
+    return false;
   }
 
   cinfo.err = jpeg_std_error(&jerr);
@@ -573,7 +574,7 @@ DecompressJpegRectBPP(uint32_t x, uint32_t y, uint32_t w, uint32_t h)
     fprintf(stderr, "Tight Encoding: Wrong JPEG data received.\n");
     jpeg_destroy_decompress(&cinfo);
     free(compressedData);
-    return False;
+    return false;
   }
 
   rowPointer[0] = (JSAMPROW)buffer;

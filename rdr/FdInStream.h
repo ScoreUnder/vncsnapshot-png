@@ -23,6 +23,7 @@
 #ifndef __RDR_FDINSTREAM_H__
 #define __RDR_FDINSTREAM_H__
 
+#include <stdbool.h>
 #include <stdint.h>
 #include "InStream.h"
 

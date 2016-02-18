@@ -21,6 +21,7 @@
  * vncsnapshot.c - the VNC snapshot.
  */
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <inttypes.h>
 #include <time.h>
@@ -216,7 +217,7 @@ main(int argc, char **argv)
       appData.rectHeight = si.framebufferHeight - (uint32_t)appData.rectY;
     }
     if (!SendFramebufferUpdateRequest((uint16_t)appData.rectX, (uint16_t)appData.rectY, (uint16_t)appData.rectWidth,
-                                      (uint16_t)appData.rectHeight, False)) {
+                                      (uint16_t)appData.rectHeight, false)) {
       exit(1);
     }
 

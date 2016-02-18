@@ -28,6 +28,7 @@
  */
 
 #include <assert.h>
+#include <stdbool.h>
 
 #define HandleZlibBPP CONCAT2E(HandleZlib,BPP)
 #ifndef CARDBPP
@@ -35,7 +36,7 @@
 #define CARDBPP CONCAT2E(CONCAT2E(uint,BPP),_t)
 #endif
 
-static Bool
+static bool
 HandleZlibBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
 {
   rfbZlibHeader hdr;
@@ -64,7 +65,7 @@ HandleZlibBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
   }
 
   if (!ReadFromRFBServer((uint8_t *)&hdr, sz_rfbZlibHeader))
-    return False;
+    return false;
 
   remaining = Swap32IfLE(hdr.nBytes);
 
@@ -77,7 +78,7 @@ HandleZlibBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
   decompStream.data_type = Z_BINARY;
 
   /* Initialize the decompression stream structures on the first invocation. */
-  if ( decompStreamInited == False ) {
+  if ( decompStreamInited == false ) {
 
     inflateResult = inflateInit( &decompStream );
 
@@ -86,10 +87,10 @@ HandleZlibBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
               "inflateInit returned error: %d, msg: %s\n",
               inflateResult,
               decompStream.msg);
-      return False;
+      return false;
     }
 
-    decompStreamInited = True;
+    decompStreamInited = true;
 
   }
 
@@ -110,7 +111,7 @@ HandleZlibBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
 
     /* Fill the buffer, obtaining data from the server. */
     if (!ReadFromRFBServer(buffer,toRead))
-      return False;
+      return false;
 
     decompStream.next_in  = ( Bytef * )buffer;
     decompStream.avail_in = (uInt) toRead;
@@ -122,14 +123,14 @@ HandleZlibBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
     /* We never supply a dictionary for compression. */
     if ( inflateResult == Z_NEED_DICT ) {
       fprintf(stderr,"zlib inflate needs a dictionary!\n");
-      return False;
+      return false;
     }
     if ( inflateResult < 0 ) {
       fprintf(stderr,
               "zlib inflate returned error: %d, msg: %s\n",
               inflateResult,
               decompStream.msg);
-      return False;
+      return false;
     }
 
     /* Result buffer allocated to be at least large enough.  We should
@@ -138,7 +139,7 @@ HandleZlibBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
     if (( decompStream.avail_in > 0 ) &&
         ( decompStream.avail_out <= 0 )) {
       fprintf(stderr,"zlib inflate ran out of space!\n");
-      return False;
+      return false;
     }
 
     remaining -= toRead;
@@ -157,9 +158,9 @@ HandleZlibBPP (uint32_t rx, uint32_t ry, uint32_t rw, uint32_t rh)
             "zlib inflate returned error: %d, msg: %s\n",
             inflateResult,
             decompStream.msg);
-    return False;
+    return false;
 
   }
 
-  return True;
+  return true;
 }

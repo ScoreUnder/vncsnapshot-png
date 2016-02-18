@@ -28,6 +28,7 @@
 #include "../rdr/ZlibInStream.h"
 #include "../rdr/InStream.h"
 #include <assert.h>
+#include <stdbool.h>
 
 using namespace rdr;
 

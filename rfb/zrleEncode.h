@@ -33,6 +33,7 @@
 
 #include "../rdr/OutStream.h"
 #include <assert.h>
+#include <stdbool.h>
 
 using namespace rdr;
 

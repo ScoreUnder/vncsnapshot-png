@@ -37,6 +37,7 @@ typedef int SOCKET;
 #define close(x) closesocket(x)
 #endif
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "vncsnapshot.h"
@@ -44,7 +45,7 @@ typedef int SOCKET;
 #define FLASHWIDTH 50   /* pixels */
 #define FLASHDELAY 1    /* seconds */
 
-Bool listenSpecified = False;
+bool listenSpecified = false;
 uint16_t listenPort = 0, flashPort = 0;
 
 
@@ -59,7 +60,7 @@ uint16_t listenPort = 0, flashPort = 0;
 void
 listenForIncomingConnections(int *argc, char **argv, int listenArgIndex)
 {
-  listenSpecified = True;
+  listenSpecified = true;
 
   if (listenArgIndex+1 < *argc && argv[listenArgIndex+1][0] >= '0' &&
                                             argv[listenArgIndex+1][0] <= '9') {
@@ -84,7 +85,7 @@ listenForIncomingConnections(int *argc, char **argv, int listenArgIndex)
   fprintf(stderr,"%s -listen: Command line errors are not reported until "
           "a connection comes in.\n", programName);
 
-  while (True) {
+  while (true) {
 
 #ifndef WIN32
     /* reap any zombies */
