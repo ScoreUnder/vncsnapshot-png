@@ -35,7 +35,7 @@ namespace rdr {
 
     FdInStream(int fd, int timeout=0, size_t bufSize=0);
     FdInStream(int fd, void (*blockCallback)(void*), void* blockCallbackArg=0,
-		  size_t bufSize=0);
+               size_t bufSize=0);
     virtual ~FdInStream();
 
     size_t getFd() { return fd; }
