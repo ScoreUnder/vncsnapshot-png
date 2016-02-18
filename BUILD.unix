@@ -51,4 +51,3 @@ Other Makefile configuration items:
 
 You can also look at make_release_bin; this script is used by the maintainer
 to build vncsnapshot on various flavours of Unix and Linux.
-< $Id: BUILD.unix,v 1.4 2004/09/09 00:22:33 grmcdorman Exp $ >

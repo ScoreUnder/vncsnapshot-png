@@ -12,5 +12,3 @@ Known bugs in vncsnapshot:
    than 1) the second and subsequent images are messed up with some VNC
    servers. This has been observed with the KDE server ("KDE Desktop
    Sharing"), and with Ultra VNC.
-
-< $Id: BUGS,v 1.5 2004/09/09 22:10:03 grmcdorman Exp $ >

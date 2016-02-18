@@ -1,5 +1,4 @@
 .TH "vncsnapshot" "1" "1.0beta2" "Grant McDorman" "VNC"
-.\" $Id: vncsnapshot.man1,v 1.5 2004/09/09 22:10:03 grmcdorman Exp $
 .SH "NAME"
 .LP 
 vncsnapshot \- grab snapshots from VNC servers

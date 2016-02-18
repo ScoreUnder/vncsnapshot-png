@@ -16,5 +16,3 @@ Bug fixes include:
 A new build script, make_release_bin, for Linux/Unix systems is also provided;
 it is intended for use by the maintainer to create compiled versions of the
 programs on multiple platforms with minimum pain.
-
-< $Id: RELEASE-NOTES.txt,v 1.4 2004/09/09 00:22:33 grmcdorman Exp $ >
