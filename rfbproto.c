@@ -398,7 +398,7 @@ bool SendSetEncodings()
 
     if (se->nEncodings < MAX_ENCODINGS && requestQualityLevel) {
       if (appData.qualityLevel < 0 || appData.qualityLevel > 9)
-        appData.qualityLevel = 5;
+        appData.qualityLevel = 9;
       encs[se->nEncodings++] = Swap32IfLE((uint32_t)appData.qualityLevel +
                                           rfbEncodingQualityLevel0);
     }
