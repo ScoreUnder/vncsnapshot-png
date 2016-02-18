@@ -17,9 +17,3 @@ Features
 * Saves image to a PNG file, unlike the usual vncsnapshot which saves a lossy JPEG.
 * The remote cursor is NOT included - unfortunately, the server doesn't provide a way of including the cursor in the snapshot. (TODO: verify this - sometimes it is included against our will)
 * Standard VNC/TightVNC options (encoding, etc.) are available.
-
----
-
-On Windows, -listen, -tunnel and -via options are not available.
-On Windows systems, please read BUILD.win32.
-On Unix and Linux systems, please read BUILD.unix.
