@@ -17,9 +17,10 @@
 // USA.
 
 #include <stdint.h>
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
+#include <cstdio>
+#include <cstring>
+#include <cerrno>
+extern "C" {
 #include <sys/types.h>
 #ifdef _WIN32
 #include <winsock.h>
@@ -36,6 +37,7 @@
 #ifdef _AIX
 #include <sys/select.h>
 #endif
+}
 
 #include "FdInStream.h"
 #include "Exception.h"

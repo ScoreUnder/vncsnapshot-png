@@ -24,8 +24,9 @@
 #ifndef __RDR_OUTSTREAM_H__
 #define __RDR_OUTSTREAM_H__
 
-#include <assert.h>
-#include <string.h>
+#include <cassert>
+#include <cstring>
+#include <limits>
 #include <stdint.h>
 
 namespace rdr {
@@ -77,7 +78,7 @@ namespace rdr {
 
     inline void writeString(const char* str) {
       size_t len = strlen(str);
-      assert(len < UINT32_MAX);
+      assert(len < std::numeric_limits<uint32_t>::max());
       writeU32((uint32_t)len);
       writeBytes(str, len);
     }
