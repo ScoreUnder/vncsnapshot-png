@@ -51,7 +51,7 @@ Options cmdLineOptions[] = {
   {"-ignoreblank",   setFlag,   &appData.ignoreBlank, 1, ": ignore blank images"},
   {"-jpeg",          setFlag,   &appData.enableJPEG, 1, ": use JPEG transmission encoding"},
   {"-nocursor",      setFlag,   &appData.useRemoteCursor, 0, ": do not include remote cursor"},
-  {"-nojpeg",        setFlag,   &appData.enableJPEG, 0, ": do not use JPEG transmission encoding"},
+  {"-nojpeg",        setFlag,   &appData.enableJPEG, 0, ": do not use JPEG transmission encoding (this is the default)"},
   {"-passwd",        setString, &appData.passwordFile, 0, " <PASSWD-FILENAME>: read password from file"},
   {"-quiet",         setFlag,   &appData.quiet, 1, ": do not output messages"},
   {"-rect",          setString, &rect, 0, " wxh+x+y: define rectangle to capture (default entire screen)"},
@@ -88,7 +88,7 @@ AppData appData = {
     9,      /* qualityLevel */
     -1,     /* useRemoteCursor */
     -1,     /* ignoreBlank */
-    -1,     /* enableJPEG */
+    0,      /* enableJPEG */
     NULL,   /* outputFilename */
     0,      /* quiet */
     0, 0,   /* rectXNegative, rectYNegative */
