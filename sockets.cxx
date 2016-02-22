@@ -37,10 +37,6 @@ typedef int socklen_t;
 #include <fcntl.h>
 #endif
 
-#ifdef __APPLE__
-typedef int socklen_t;
-#endif
-
 extern "C" {
 #include "vncsnapshot.h"
 }
